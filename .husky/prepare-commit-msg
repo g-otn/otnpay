@@ -1,1 +1,0 @@
-exec < /dev/tty && bunx --no-install cz --hook || true
