@@ -12,7 +12,7 @@ export function App() {
     <div className="app">
       <header className="app-header">
         <div className="header-content">
-          <h1 className="app-title">Nx Shop Demo</h1>
+          <h1 className="app-title">Official Shop Demo</h1>
         </div>
       </header>
 
