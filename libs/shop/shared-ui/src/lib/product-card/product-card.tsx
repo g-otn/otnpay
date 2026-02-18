@@ -1,4 +1,4 @@
-import { Product } from '@org/models';
+import { Product } from '@otnpay/models';
 import styles from './product-card.module.css';
 
 interface ProductCardProps {
@@ -24,7 +24,9 @@ export function ProductCard({ product, onProductClick }: ProductCardProps) {
 
   return (
     <div
-      className={`${styles['product-card']} ${!product.inStock ? styles['out-of-stock'] : ''}`}
+      className={`${styles['product-card']} ${
+        !product.inStock ? styles['out-of-stock'] : ''
+      }`}
       onClick={() => onProductClick(product)}
       onKeyDown={handleKeyDown}
       tabIndex={0}
@@ -48,7 +50,9 @@ export function ProductCard({ product, onProductClick }: ProductCardProps) {
               </span>
             ))}
           </span>
-          <span className={styles['review-count']}>({product.reviewCount})</span>
+          <span className={styles['review-count']}>
+            ({product.reviewCount})
+          </span>
         </div>
         <div className={styles['product-price']}>
           ${product.price.toFixed(2)}

@@ -24,7 +24,7 @@ export default defineConfig({
   },
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: 'bunx nx run @org/shop:preview',
+    command: 'bunx nx run @otnpay/shop:preview',
     url: 'http://localhost:4200',
     reuseExistingServer: true,
     cwd: workspaceRoot,

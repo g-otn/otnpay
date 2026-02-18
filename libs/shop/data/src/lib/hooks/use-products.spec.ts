@@ -1,7 +1,7 @@
 import { renderHook, waitFor } from '@testing-library/react';
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { useProducts } from './use-products';
-import {ProductFilter} from "@org/models";
+import { ProductFilter } from '@otnpay/models';
 
 // Mock fetch
 global.fetch = vi.fn();
@@ -170,7 +170,7 @@ describe('useProducts', () => {
     const { result, rerender } = renderHook(
       ({ filter }) => useProducts(filter),
       {
-        initialProps: { filter: undefined } as {filter?: ProductFilter},
+        initialProps: { filter: undefined } as { filter?: ProductFilter },
       }
     );
 
@@ -181,7 +181,7 @@ describe('useProducts', () => {
     expect(fetch).toHaveBeenCalledTimes(1);
 
     // Change filter
-    rerender({ filter: { category: 'Electronics' }});
+    rerender({ filter: { category: 'Electronics' } });
 
     await waitFor(() => {
       expect(fetch).toHaveBeenCalledTimes(2);

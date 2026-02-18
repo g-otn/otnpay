@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { useProduct } from '@org/shop-data';
-import { LoadingSpinner, ErrorMessage } from '@org/shop-shared-ui';
+import { useProduct } from '@otnpay/shop-data';
+import { LoadingSpinner, ErrorMessage } from '@otnpay/shop-shared-ui';
 import styles from './product-detail.module.css';
 
 export function ProductDetail() {

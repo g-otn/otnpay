@@ -17,13 +17,13 @@ This repository demonstrates a production-ready React monorepo with:
 
 - **7 Libraries**
 
-  - `@org/shop-feature-products` - Product listing feature (React)
-  - `@org/shop-feature-product-detail` - Product detail feature (React)
-  - `@org/shop-data` - Data access layer for shop features
-  - `@org/shop-shared-ui` - Shared UI components
-  - `@org/models` - Shared data models
-  - `@org/api-products` - API product service library
-  - `@org/shared-test-utils` - Shared testing utilities
+  - `@otnpay/shop-feature-products` - Product listing feature (React)
+  - `@otnpay/shop-feature-product-detail` - Product detail feature (React)
+  - `@otnpay/shop-data` - Data access layer for shop features
+  - `@otnpay/shop-shared-ui` - Shared UI components
+  - `@otnpay/models` - Shared data models
+  - `@otnpay/api-products` - API product service library
+  - `@otnpay/shared-test-utils` - Shared testing utilities
 
 - **E2E Testing**
   - `shop-e2e` - Playwright tests for the shop application

@@ -1,6 +1,11 @@
 import express from 'express';
-import { ProductsService } from '@org/api-products';
-import { ApiResponse, Product, ProductFilter, PaginatedResponse } from '@org/models';
+import { ProductsService } from '@otnpay/api-products';
+import {
+  ApiResponse,
+  Product,
+  ProductFilter,
+  PaginatedResponse,
+} from '@otnpay/models';
 
 const host = process.env.HOST ?? 'localhost';
 const port = process.env.PORT ? Number(process.env.PORT) : 3333;
@@ -15,7 +20,10 @@ app.use(express.json());
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  res.header(
+    'Access-Control-Allow-Headers',
+    'Origin, X-Requested-With, Content-Type, Accept'
+  );
   if (req.method === 'OPTIONS') {
     res.sendStatus(200);
   } else {

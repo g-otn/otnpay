@@ -2,10 +2,10 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { BrowserRouter } from 'react-router-dom';
 import { ProductList } from './product-list';
-import { useProducts, useCategories } from '@org/shop-data';
+import { useProducts, useCategories } from '@otnpay/shop-data';
 
 // Mock the hooks
-vi.mock('@org/shop-data', () => ({
+vi.mock('@otnpay/shop-data', () => ({
   useProducts: vi.fn(),
   useCategories: vi.fn(),
 }));
@@ -240,11 +240,7 @@ describe('ProductList', () => {
     fireEvent.click(nextButton);
 
     await waitFor(() => {
-      expect(mockUseProducts).toHaveBeenCalledWith(
-        expect.any(Object),
-        2,
-        12
-      );
+      expect(mockUseProducts).toHaveBeenCalledWith(expect.any(Object), 2, 12);
     });
   });
 

@@ -3,7 +3,7 @@
   "configVersion": 0,
   "workspaces": {
     "": {
-      "name": "@org/source",
+      "name": "@otnpay/source",
       "dependencies": {
         "express": "^4.21.2",
         "react": "19.0.0",
@@ -69,80 +69,80 @@
       },
     },
     "apps/api": {
-      "name": "@org/api",
+      "name": "@otnpay/api",
       "version": "0.0.1",
       "dependencies": {
-        "@org/api-products": "*",
-        "@org/models": "*",
+        "@otnpay/api-products": "*",
+        "@otnpay/models": "*",
         "express": "^4.21.2",
       },
     },
     "apps/shop": {
-      "name": "@org/shop",
+      "name": "@otnpay/shop",
       "version": "0.0.1",
       "devDependencies": {
-        "@org/models": "*",
-        "@org/shop-data": "*",
-        "@org/shop-feature-product-detail": "*",
-        "@org/shop-feature-products": "*",
-        "@org/shop-shared-ui": "*",
+        "@otnpay/models": "*",
+        "@otnpay/shop-data": "*",
+        "@otnpay/shop-feature-product-detail": "*",
+        "@otnpay/shop-feature-products": "*",
+        "@otnpay/shop-shared-ui": "*",
       },
     },
     "apps/shop-e2e": {
-      "name": "@org/shop-e2e",
+      "name": "@otnpay/shop-e2e",
       "version": "0.0.1",
     },
     "libs/api/products": {
-      "name": "@org/api-products",
+      "name": "@otnpay/api-products",
       "version": "0.0.1",
       "dependencies": {
         "tslib": "^2.3.0",
       },
       "devDependencies": {
-        "@org/models": "*",
+        "@otnpay/models": "*",
       },
     },
     "libs/shared/models": {
-      "name": "@org/models",
+      "name": "@otnpay/models",
       "version": "0.0.1",
     },
     "libs/shared/test-utils": {
-      "name": "@org/shared-test-utils",
+      "name": "@otnpay/shared-test-utils",
       "version": "0.0.1",
       "devDependencies": {
-        "@org/models": "*",
+        "@otnpay/models": "*",
       },
     },
     "libs/shop/data": {
-      "name": "@org/shop-data",
+      "name": "@otnpay/shop-data",
       "version": "0.0.1",
       "devDependencies": {
-        "@org/models": "*",
+        "@otnpay/models": "*",
       },
     },
     "libs/shop/feature-product-detail": {
-      "name": "@org/shop-feature-product-detail",
+      "name": "@otnpay/shop-feature-product-detail",
       "version": "0.0.1",
       "devDependencies": {
-        "@org/shop-data": "*",
-        "@org/shop-shared-ui": "*",
+        "@otnpay/shop-data": "*",
+        "@otnpay/shop-shared-ui": "*",
       },
     },
     "libs/shop/feature-products": {
-      "name": "@org/shop-feature-products",
+      "name": "@otnpay/shop-feature-products",
       "version": "0.0.1",
       "devDependencies": {
-        "@org/models": "*",
-        "@org/shop-data": "*",
-        "@org/shop-shared-ui": "*",
+        "@otnpay/models": "*",
+        "@otnpay/shop-data": "*",
+        "@otnpay/shop-shared-ui": "*",
       },
     },
     "libs/shop/shared-ui": {
-      "name": "@org/shop-shared-ui",
+      "name": "@otnpay/shop-shared-ui",
       "version": "0.0.1",
       "devDependencies": {
-        "@org/models": "*",
-        "@org/shared-test-utils": "*",
+        "@otnpay/models": "*",
+        "@otnpay/shared-test-utils": "*",
       },
     },
   },
@@ -659,25 +659,25 @@
 
     "@nx/workspace": ["@nx/workspace@22.5.0", "", { "dependencies": { "@nx/devkit": "22.5.0", "@zkochan/js-yaml": "0.0.7", "chalk": "^4.1.0", "enquirer": "~2.3.6", "nx": "22.5.0", "picomatch": "4.0.2", "semver": "^7.6.3", "tslib": "^2.3.0", "yargs-parser": "21.1.1" } }, "sha512-kFXSMV7eGVBSJlfPtbIDrlUFYDspFpwHcsYFU+qwyg/b5R8lNfYKlSC0ypL2XyG4kwCMoTr4BDEaY5nYRWW3Lw=="],
 
-    "@org/api": ["@org/api@workspace:apps/api"],
+    "@otnpay/api": ["@otnpay/api@workspace:apps/api"],
 
-    "@org/api-products": ["@org/api-products@workspace:libs/api/products"],
+    "@otnpay/api-products": ["@otnpay/api-products@workspace:libs/api/products"],
 
-    "@org/models": ["@org/models@workspace:libs/shared/models"],
+    "@otnpay/models": ["@otnpay/models@workspace:libs/shared/models"],
 
-    "@org/shared-test-utils": ["@org/shared-test-utils@workspace:libs/shared/test-utils"],
+    "@otnpay/shared-test-utils": ["@otnpay/shared-test-utils@workspace:libs/shared/test-utils"],
 
-    "@org/shop": ["@org/shop@workspace:apps/shop"],
+    "@otnpay/shop": ["@otnpay/shop@workspace:apps/shop"],
 
-    "@org/shop-data": ["@org/shop-data@workspace:libs/shop/data"],
+    "@otnpay/shop-data": ["@otnpay/shop-data@workspace:libs/shop/data"],
 
-    "@org/shop-e2e": ["@org/shop-e2e@workspace:apps/shop-e2e"],
+    "@otnpay/shop-e2e": ["@otnpay/shop-e2e@workspace:apps/shop-e2e"],
 
-    "@org/shop-feature-product-detail": ["@org/shop-feature-product-detail@workspace:libs/shop/feature-product-detail"],
+    "@otnpay/shop-feature-product-detail": ["@otnpay/shop-feature-product-detail@workspace:libs/shop/feature-product-detail"],
 
-    "@org/shop-feature-products": ["@org/shop-feature-products@workspace:libs/shop/feature-products"],
+    "@otnpay/shop-feature-products": ["@otnpay/shop-feature-products@workspace:libs/shop/feature-products"],
 
-    "@org/shop-shared-ui": ["@org/shop-shared-ui@workspace:libs/shop/shared-ui"],
+    "@otnpay/shop-shared-ui": ["@otnpay/shop-shared-ui@workspace:libs/shop/shared-ui"],
 
     "@oxc-resolver/binding-android-arm-eabi": ["@oxc-resolver/binding-android-arm-eabi@11.17.1", "", { "os": "android", "cpu": "arm" }, "sha512-+VuZyMYYaap5uDAU1xDU3Kul0FekLqpBS8kI5JozlWfYQKnc/HsZg2gHPkQrj0SC9lt74WMNCfOzZZJlYXSdEQ=="],
 

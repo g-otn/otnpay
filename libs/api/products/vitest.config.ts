@@ -4,7 +4,7 @@ export default defineConfig({
   root: __dirname,
   cacheDir: '../../../node_modules/.vite/libs/api/products',
   test: {
-    name: '@org/products',
+    name: '@otnpay/products',
     watch: false,
     globals: true,
     environment: 'node',

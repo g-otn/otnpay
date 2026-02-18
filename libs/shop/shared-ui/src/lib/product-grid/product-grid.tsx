@@ -1,4 +1,4 @@
-import { Product } from '@org/models';
+import { Product } from '@otnpay/models';
 import { ProductCard } from '../product-card/product-card';
 import styles from './product-grid.module.css';
 

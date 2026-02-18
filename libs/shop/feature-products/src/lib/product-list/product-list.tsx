@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Product, ProductFilter } from '@org/models';
-import { useProducts, useCategories } from '@org/shop-data';
+import { Product, ProductFilter } from '@otnpay/models';
+import { useProducts, useCategories } from '@otnpay/shop-data';
 import {
   ProductGrid,
   LoadingSpinner,
   ErrorMessage,
-} from '@org/shop-shared-ui';
+} from '@otnpay/shop-shared-ui';
 import styles from './product-list.module.css';
 
 export function ProductList() {
@@ -131,7 +131,10 @@ export function ProductList() {
             Showing {products.length} of {totalProducts} products
           </div>
 
-          <ProductGrid products={products} onProductSelect={handleProductSelect} />
+          <ProductGrid
+            products={products}
+            onProductSelect={handleProductSelect}
+          />
 
           {totalPages > 1 && (
             <div className={styles['pagination']}>

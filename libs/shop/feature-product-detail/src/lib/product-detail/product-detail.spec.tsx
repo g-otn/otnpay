@@ -2,11 +2,11 @@ import { render, screen } from '@testing-library/react';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { BrowserRouter } from 'react-router-dom';
 import { ProductDetail } from './product-detail';
-import { useProduct } from '@org/shop-data';
+import { useProduct } from '@otnpay/shop-data';
 import { useParams, useNavigate } from 'react-router-dom';
 
 // Mock the hooks
-vi.mock('@org/shop-data', () => ({
+vi.mock('@otnpay/shop-data', () => ({
   useProduct: vi.fn(),
 }));
 
@@ -19,11 +19,11 @@ vi.mock('react-router-dom', async () => {
   };
 });
 
-
 const mockProduct = {
   id: '1',
   name: 'Wireless Bluetooth Headphones',
-  description: 'Premium wireless headphones with active noise cancellation and 30-hour battery life.',
+  description:
+    'Premium wireless headphones with active noise cancellation and 30-hour battery life.',
   price: 99.99,
   category: 'Electronics',
   imageUrl: 'https://via.placeholder.com/600x400',
@@ -102,8 +102,14 @@ describe('ProductDetail', () => {
       </BrowserRouter>
     );
 
-    expect(screen.getByText('Wireless Bluetooth Headphones')).toBeInTheDocument();
-    expect(screen.getByText('Premium wireless headphones with active noise cancellation and 30-hour battery life.')).toBeInTheDocument();
+    expect(
+      screen.getByText('Wireless Bluetooth Headphones')
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'Premium wireless headphones with active noise cancellation and 30-hour battery life.'
+      )
+    ).toBeInTheDocument();
     expect(screen.getByText('$99.99')).toBeInTheDocument();
     expect(screen.getAllByText('Electronics')[0]).toBeInTheDocument();
     expect(screen.getByText('✓ In Stock')).toBeInTheDocument();
@@ -125,7 +131,9 @@ describe('ProductDetail', () => {
     );
 
     expect(screen.getAllByText('Out of Stock')[0]).toBeInTheDocument();
-    const addToCartButton = screen.getByRole('button', { name: 'Out of Stock' });
+    const addToCartButton = screen.getByRole('button', {
+      name: 'Out of Stock',
+    });
     expect(addToCartButton).toBeDisabled();
   });
 
@@ -164,7 +172,9 @@ describe('ProductDetail', () => {
       </BrowserRouter>
     );
 
-    const backButton = screen.getByRole('button', { name: /back to products/i });
+    const backButton = screen.getByRole('button', {
+      name: /back to products/i,
+    });
     backButton.click();
 
     expect(mockNavigate).toHaveBeenCalledWith('/products');

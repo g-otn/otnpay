@@ -1,5 +1,5 @@
 {
-  "name": "@org/shop-feature-products",
+  "name": "@otnpay/shop-feature-products",
   "version": "0.0.1",
   "main": "./src/index.ts",
   "types": "./src/index.ts",
@@ -18,8 +18,8 @@
     ]
   },
   "devDependencies": {
-    "@org/models": "*",
-    "@org/shop-data": "*",
-    "@org/shop-shared-ui": "*"
+    "@otnpay/models": "*",
+    "@otnpay/shop-data": "*",
+    "@otnpay/shop-shared-ui": "*"
   }
 }

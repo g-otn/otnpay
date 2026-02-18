@@ -1,4 +1,4 @@
-import { Product } from '@org/models';
+import { Product } from '@otnpay/models';
 
 export const createMockProduct = (overrides?: Partial<Product>): Product => ({
   id: '1',
@@ -25,4 +25,10 @@ export const createMockProductList = (count = 3): Product[] => {
   );
 };
 
-export const mockCategories = ['Electronics', 'Clothing', 'Home & Kitchen', 'Sports', 'Accessories'];
+export const mockCategories = [
+  'Electronics',
+  'Clothing',
+  'Home & Kitchen',
+  'Sports',
+  'Accessories',
+];

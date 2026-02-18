@@ -1,5 +1,5 @@
 {
-  "name": "@org/shared-test-utils",
+  "name": "@otnpay/shared-test-utils",
   "version": "0.0.1",
   "type": "commonjs",
   "main": "./src/index.ts",
@@ -13,11 +13,14 @@
     "./package.json": "./package.json"
   },
   "devDependencies": {
-    "@org/models": "*"
+    "@otnpay/models": "*"
   },
   "nx": {
     "sourceRoot": "libs/shared/test-utils/src",
     "projectType": "library",
-    "tags": ["type:utility", "scope:shared"]
+    "tags": [
+      "type:utility",
+      "scope:shared"
+    ]
   }
 }
