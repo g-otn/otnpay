@@ -6,8 +6,11 @@ import viteTsConfigPaths from 'vite-tsconfig-paths';
 import { fileURLToPath, URL } from 'node:url';
 import tailwindcss from '@tailwindcss/vite';
 import { cloudflare } from '@cloudflare/vite-plugin';
+import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
 
 const config = defineConfig({
+  root: __dirname,
+  cacheDir: '../../node_modules/.vite/apps/web-client',
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
@@ -21,8 +24,11 @@ const config = defineConfig({
       projects: ['./tsconfig.json'],
     }),
     tailwindcss(),
-    tanstackStart(),
+    tanstackStart({
+      srcDirectory: './src',
+    }),
     viteReact(),
+    nxViteTsPaths(),
   ],
 });
 
