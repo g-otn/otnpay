@@ -1,1 +1,1 @@
-bun nx run-many --target=lint
+bun nx run-many --target=lint --tuiAutoExit
