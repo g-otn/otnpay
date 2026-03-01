@@ -1,0 +1,215 @@
+name: otnpay-dev-local
+
+# ── Reusable fragments ────────────────────────────────────────────────────────
+
+x-postgres: &postgres
+  image: postgres:18
+  restart: unless-stopped
+  environment:
+    POSTGRES_USER: dev_admin
+    POSTGRES_PASSWORD: dev_password
+    POSTGRES_DB: dev_local
+  healthcheck:
+    test: ['CMD-SHELL', 'pg_isready -U dev_admin -d dev_local']
+    interval: 3s
+    timeout: 3s
+  deploy:
+    resources:
+      limits:
+        memory: 512m
+        cpus: '1.0'
+
+x-pgdog: &pgdog
+  image: ghcr.io/pgdogdev/pgdog:main
+  restart: unless-stopped
+  deploy:
+    resources:
+      limits:
+        memory: 128m
+        cpus: '0.25'
+
+x-worker: &worker
+  build:
+    context: ./apps/service-auth
+  volumes:
+    - ./apps/service-auth/src:/app/src
+  deploy:
+    resources:
+      limits:
+        memory: 256m
+        cpus: '0.5'
+
+x-users-toml: &users-toml |
+  [[users]]
+  name = "dev_admin"
+  database = "dev_local"
+  password = "dev_password"
+
+# ── Services ──────────────────────────────────────────────────────────────────
+
+services:
+  # -- auth microservice --
+
+  auth-db:
+    <<: *postgres
+    container_name: auth-db
+    profiles: [auth]
+    ports:
+      - '9000:5432'
+    volumes:
+      - auth_postgres_data:/var/lib/postgresql
+    networks:
+      - auth-net
+
+  auth-db-pgdog:
+    <<: *pgdog
+    container_name: auth-db-pgdog
+    profiles: [auth]
+    configs:
+      - source: auth_pgdog_toml
+        target: /pgdog/pgdog.toml
+      - source: users_auth_toml
+        target: /pgdog/users.toml
+    ports:
+      - '9001:6432'
+    depends_on:
+      auth-db:
+        condition: service_healthy
+    networks:
+      - auth-net
+
+  auth-service:
+    <<: *worker
+    container_name: auth-service
+    profiles: [auth]
+    ports:
+      - '9010:8787'
+    depends_on:
+      - auth-db-pgdog
+    networks:
+      - auth-net
+
+  # -- account microservice --
+
+  account-db:
+    <<: *postgres
+    container_name: account-db
+    profiles: [account]
+    ports:
+      - '9500:5432'
+    volumes:
+      - account_postgres_data:/var/lib/postgresql
+    networks:
+      - account-net
+
+  account-db-pgdog:
+    <<: *pgdog
+    container_name: account-db-pgdog
+    profiles: [account]
+    configs:
+      - source: account_pgdog_toml
+        target: /pgdog/pgdog.toml
+      - source: users_account_toml
+        target: /pgdog/users.toml
+    ports:
+      - '9501:6432'
+    depends_on:
+      account-db:
+        condition: service_healthy
+    networks:
+      - account-net
+
+  account-redis:
+    image: redis
+    profiles: [account]
+    ports:
+      - '9502:6379'
+    networks:
+      - account-net
+    deploy:
+      resources:
+        limits:
+          memory: 128m
+          cpus: '0.25'
+
+  account-redis-proxy:
+    image: hiett/serverless-redis-http:latest
+    profiles: [account]
+    ports:
+      - '9503:80'
+    environment:
+      SRH_MODE: env
+      SRH_TOKEN: example_token
+      SRH_CONNECTION_STRING: 'redis://account-redis:6379'
+    depends_on:
+      - account-redis
+    networks:
+      - account-net
+    deploy:
+      resources:
+        limits:
+          memory: 64m
+          cpus: '0.1'
+
+  account-service:
+    <<: *worker
+    container_name: service-account
+    profiles: [account]
+    ports:
+      - '9510:8787'
+    depends_on:
+      - account-db-pgdog
+      - account-redis-proxy
+    networks:
+      - account-net
+
+# ── Configs ───────────────────────────────────────────────────────────────────
+
+configs:
+  auth_pgdog_toml:
+    content: |
+      [general]
+      port = 6432
+      default_pool_size = 10
+      pooler_mode = "transaction"
+      passthrough_auth = "enabled"
+
+      [[databases]]
+      name = "dev_local"
+      user = "dev_admin"
+      password = "dev_password"
+      host = "auth-db"
+      port = 5432
+
+  account_pgdog_toml:
+    content: |
+      [general]
+      port = 6432
+      default_pool_size = 10
+      pooler_mode = "transaction"
+      passthrough_auth = "enabled"
+
+      [[databases]]
+      name = "dev_local"
+      user = "dev_admin"
+      password = "dev_password"
+      host = "account-db"
+      port = 5432
+
+  users_auth_toml:
+    content: *users-toml
+
+  users_account_toml:
+    content: *users-toml
+
+# ── Networks ──────────────────────────────────────────────────────────────────
+
+networks:
+  auth-net:
+  account-net:
+
+# ── Volumes ───────────────────────────────────────────────────────────────────
+
+volumes:
+  auth_postgres_data:
+  account_postgres_data:
