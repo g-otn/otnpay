@@ -8,6 +8,13 @@
       "when": 1772448784117,
       "tag": "0000_gigantic_human_torch",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1772450892371,
+      "tag": "0001_early_amphibian",
+      "breakpoints": true
     }
   ]
 }

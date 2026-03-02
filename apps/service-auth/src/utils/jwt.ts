@@ -1,29 +1,34 @@
-import { JWTPayload, jwtVerify, SignJWT } from 'jose';
+import { importPKCS8, JWTPayload, jwtVerify, SignJWT } from 'jose';
 
 import { ACCESS_TOKEN_EXPIRE_TIME } from '~/utils/constants';
 
 export async function generateAccessToken(
   {
-    account_id,
-    owner_name,
+    ownerName,
+    userId,
   }: {
-    account_id: number;
-    owner_name: string;
+    ownerName: string;
+    userId: number;
   },
+  /**
+   * PEM-encoded PKCS#8 string
+   * RS256 private key
+   */
   secret: string
 ): Promise<string> {
-  return signJwt({ name: owner_name, sub: account_id.toString() }, secret);
+  const privateKey = await importPKCS8(secret, 'RS256');
+  return signJwt({ name: ownerName, sub: userId.toString() }, privateKey);
 }
 
 export async function signJwt(
   payload: JWTPayload,
-  secret: string
+  key: CryptoKey
 ): Promise<string> {
   return new SignJWT(payload)
     .setProtectedHeader({ alg: 'RSA256' })
     .setIssuedAt()
     .setExpirationTime(ACCESS_TOKEN_EXPIRE_TIME)
-    .sign(secretKey(secret));
+    .sign(key);
 }
 
 export async function verifyJwt<Claims extends Record<string, unknown>>(

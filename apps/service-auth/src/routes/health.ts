@@ -25,6 +25,7 @@ export class HealthCheck extends OpenAPIRoute {
   handle(c: Context<{ Bindings: Cloudflare.Env }>) {
     const meta = c.env.CF_VERSION_METADATA;
     return c.json({
+      requestId: c.get('requestId'),
       status: 'ok',
       timestamp: new Date().toISOString(),
       versionId: meta?.id ?? 'dev',

@@ -5,7 +5,7 @@ import { Context } from 'hono';
 import { z } from 'zod';
 
 import { getDB } from '~/db';
-import { user } from '~/db/schema';
+import { users } from '~/db/schema';
 import { REFRESH_TOKEN_REDIS_TTL, RouteTag } from '~/utils/constants';
 import { generateAccessToken } from '~/utils/jwt';
 import { hashPassword, verifyPassword } from '~/utils/password';
@@ -63,8 +63,8 @@ export class AuthLogin extends OpenAPIRoute {
     const db = getDB(c.env.AUTH_SERVICE_DB_URL);
     const [account] = await db
       .select()
-      .from(user)
-      .where(eq(user.email, email))
+      .from(users)
+      .where(eq(users.email, email))
       .limit(1);
 
     if (!account || !(await verifyPassword(account.password, password))) {
@@ -154,9 +154,9 @@ export class AuthRefresh extends OpenAPIRoute {
 
     const db = getDB(c.env.AUTH_SERVICE_DB_URL);
     const [account] = await db
-      .select({ account_id: user.account_id, owner_name: user.owner_name })
-      .from(user)
-      .where(eq(user.account_id, accountId))
+      .select({ account_id: users.account_id, owner_name: users.owner_name })
+      .from(users)
+      .where(eq(users.account_id, accountId))
       .limit(1);
 
     if (!account) {
@@ -209,11 +209,11 @@ export class AuthSignup extends OpenAPIRoute {
 
     const db = getDB(c.env.AUTH_SERVICE_DB_URL);
 
-    let account: typeof user.$inferSelect;
+    let account: typeof users.$inferSelect;
     try {
       const hashed = await hashPassword(password);
       [account] = await db
-        .insert(user)
+        .insert(users)
         .values({ email, owner_name, password: hashed })
         .returning();
     } catch (err) {

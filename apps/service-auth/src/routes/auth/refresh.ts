@@ -5,7 +5,7 @@ import { Context } from 'hono';
 import { z } from 'zod';
 
 import { getDB } from '~/db';
-import { user } from '~/db/schema';
+import { users } from '~/db/schema';
 import { badRequestResponse, unauthorizedResponse } from '~/routes/schemas';
 import {
   getDBAppName,
@@ -53,9 +53,9 @@ export class AuthRefresh extends OpenAPIRoute {
       getDBAppName(c.get('requestId'), c.env.CF_VERSION_METADATA?.tag)
     );
     const [account] = await db
-      .select({ account_id: user.account_id, owner_name: user.owner_name })
-      .from(user)
-      .where(eq(user.account_id, accountId))
+      .select({ account_id: users.account_id, owner_name: users.owner_name })
+      .from(users)
+      .where(eq(users.account_id, accountId))
       .limit(1);
     if (!account) {
       return c.json({ error: 'Account not found' }, 401);

@@ -5,7 +5,7 @@ import { Context } from 'hono';
 import { z } from 'zod';
 
 import { getDB } from '~/db';
-import { user } from '~/db/schema';
+import { users } from '~/db/schema';
 import { badRequestResponse, unauthorizedResponse } from '~/routes/schemas';
 import {
   getDBAppName,
@@ -48,18 +48,22 @@ export class AuthLogin extends OpenAPIRoute {
       c.env.AUTH_SERVICE_DB_URL,
       getDBAppName(c.get('requestId'), c.env.CF_VERSION_METADATA?.tag)
     );
-    const [account] = await db
-      .select()
-      .from(user)
-      .where(eq(user.email, email))
+    const [user] = await db
+      .select({
+        id: users.id,
+        ownerName: users.owner_name,
+        password: users.password,
+      })
+      .from(users)
+      .where(eq(users.email, email))
       .limit(1);
 
-    if (!account || !(await verifyPassword(account.password, password))) {
+    if (!user || !(await verifyPassword(user.password, password))) {
       return c.json({ error: 'Invalid credentials' }, 401);
     }
 
     const accessToken = await generateAccessToken(
-      account,
+      { ownerName: user.ownerName, userId: user.id },
       c.env.AUTH_SERVICE_JWT_SECRET
     );
     const refreshToken = generateRefreshToken();
@@ -68,7 +72,7 @@ export class AuthLogin extends OpenAPIRoute {
       token: c.env.AUTH_SERVICE_REDIS_TOKEN,
       url: c.env.AUTH_SERVICE_REDIS_URL,
     });
-    await redis.set(`refresh:${refreshToken}`, account.account_id, {
+    await redis.set(`refresh:${refreshToken}`, user.id, {
       ex: REFRESH_TOKEN_REDIS_TTL,
     });
 

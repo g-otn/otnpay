@@ -1,20 +1,16 @@
-import { Redis } from '@upstash/redis/cloudflare';
+import type { PostgresError } from 'postgres';
+
 import { contentJson, OpenAPIRoute } from 'chanfana';
 import { owaspSymbols, passwordStrength } from 'check-password-strength';
+import { DrizzleQueryError } from 'drizzle-orm';
 import { Context } from 'hono';
 import { z } from 'zod';
 
 import { getDB } from '~/db';
-import { user } from '~/db/schema';
+import { users } from '~/db/schema';
 import { badRequestResponse, ErrorSchema } from '~/routes/schemas';
-import {
-  getDBAppName,
-  REFRESH_TOKEN_REDIS_TTL,
-  RouteTag,
-} from '~/utils/constants';
-import { generateAccessToken } from '~/utils/jwt';
+import { getDBAppName, RouteTag } from '~/utils/constants';
 import { hashPassword } from '~/utils/password';
-import { generateRefreshToken } from '~/utils/refreshToken';
 
 const allowedPasswordChars = new Set(
   'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789' +
@@ -65,38 +61,30 @@ export class AuthSignup extends OpenAPIRoute {
       getDBAppName(c.get('requestId'), c.env.CF_VERSION_METADATA?.tag)
     );
 
-    let account: typeof user.$inferSelect;
+    let newUser: { id: number };
     try {
       const hashed = await hashPassword(password);
-      [account] = await db
-        .insert(user)
+      [newUser] = await db
+        .insert(users)
         .values({ email, owner_name, password: hashed })
-        .returning();
-    } catch (err) {
-      const isUniqueViolation =
-        err instanceof Error && err.message.includes('23505');
-      if (isUniqueViolation) {
-        return c.json({ error: 'Email or owner name already taken' }, 409);
+        .returning({ id: users.id });
+    } catch (error) {
+      console.log('error', error);
+      const isUniqueEmailViolation =
+        error instanceof DrizzleQueryError &&
+        (error.cause as PostgresError).code === '23505' &&
+        (error.cause as PostgresError).constraint_name ===
+          users.email.uniqueName;
+      if (isUniqueEmailViolation) {
+        return c.json({ error: 'Email already taken' }, 409);
       }
-      throw err;
+      throw error;
     }
 
-    const accessToken = await generateAccessToken(
-      account,
-      c.env.AUTH_SERVICE_JWT_SECRET
-    );
-    const refreshToken = generateRefreshToken();
-
-    const redis = new Redis({
-      token: c.env.AUTH_SERVICE_REDIS_TOKEN,
-      url: c.env.AUTH_SERVICE_REDIS_URL,
-    });
-    await redis.set(`refresh:${refreshToken}`, account.account_id, {
-      ex: REFRESH_TOKEN_REDIS_TTL,
-    });
-
     return c.json(
-      { access_token: accessToken, refresh_token: refreshToken },
+      {
+        userId: newUser.id,
+      },
       201
     );
   }
