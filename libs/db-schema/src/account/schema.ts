@@ -1,4 +1,6 @@
+import { sql } from 'drizzle-orm';
 import {
+  check,
   index,
   integer,
   numeric,
@@ -24,7 +26,10 @@ export const account = pgTable(
     created_at: timestamp('created_at').defaultNow().notNull(),
     updated_at: timestamp('updated_at').defaultNow().notNull(),
   },
-  (t) => [index('accounts_account_id_idx').on(t.account_id)]
+  (t) => [
+    index('accounts_account_id_idx').on(t.account_id),
+    check('accounts_balance_non_negative', sql`${t.balance} >= 0`),
+  ]
 );
 
 export const transaction = pgTable(

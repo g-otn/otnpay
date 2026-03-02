@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "service-auth",
+  "name": "otnpay-auth-service",
   "main": "src/index.ts",
   "compatibility_date": "2026-02-19",
   "compatibility_flags": ["nodejs_compat"],
@@ -16,6 +16,9 @@
       "vars": {},
       "workers_dev": false
     }
+  },
+  "version_metadata": {
+    "binding": "CF_VERSION_METADATA"
   }
   // "kv_namespaces": [
   //   {

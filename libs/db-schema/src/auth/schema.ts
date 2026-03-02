@@ -6,7 +6,7 @@ export const user = pgTable(
     account_id: serial('account_id').primaryKey(),
     created_at: timestamp('created_at').defaultNow().notNull(),
     email: text('email').notNull().unique(),
-    owner_name: text('owner_name').notNull().unique(),
+    owner_name: text('owner_name').notNull(),
     password: text('password').notNull(),
   },
   (t) => [index('user_email_idx').on(t.email)]
