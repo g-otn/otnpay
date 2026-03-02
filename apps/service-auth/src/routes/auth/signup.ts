@@ -58,7 +58,7 @@ export class AuthSignup extends OpenAPIRoute {
         log
       );
       [newUser] = await timed(
-        'Create new user in DB',
+        `Create new user ${email} in DB`,
         db
           .insert(users)
           .values({ email, owner_name, password: hashedPassword })
@@ -72,6 +72,7 @@ export class AuthSignup extends OpenAPIRoute {
         (error.cause as PostgresError).constraint_name ===
           users.email.uniqueName;
       if (isUniqueEmailViolation) {
+        log.info(`Email ${email} already taken`);
         return c.json({ error: 'Email already taken' }, 409);
       }
       c.get('log').error(error, 'Error while registering new user');

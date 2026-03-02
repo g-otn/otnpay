@@ -16,8 +16,8 @@ export const passwordSchema = z
     `Password may only contain letters, numbers, and symbols: ${owaspSymbols}`
   )
   .refine(
-    (p) => passwordStrength(p, undefined, owaspSymbols).id >= 3,
-    'Password must be strong: at least 12 characters containing uppercase, lowercase, numbers and symbols'
+    (p) => passwordStrength(p, undefined, owaspSymbols).id >= 2,
+    'Password must be strong: at least 12 characters containing uppercase, lowercase, numbers'
   );
 
 export const ErrorSchema = z.object({ error: z.string() });
