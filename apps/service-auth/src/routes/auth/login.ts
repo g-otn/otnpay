@@ -1,5 +1,4 @@
 import { timed } from '@otnpay/utils';
-import { Redis } from '@upstash/redis/cloudflare';
 import { contentJson, OpenAPIRoute } from 'chanfana';
 import { eq } from 'drizzle-orm';
 import { Context } from 'hono';
@@ -7,13 +6,14 @@ import { z } from 'zod';
 
 import { getDB } from '~/db';
 import { users } from '~/db/schema';
+import { getRedis } from '~/redis';
 import {
   badRequestResponse,
   passwordSchema,
   unauthorizedResponse,
 } from '~/routes/schemas';
 import { AppEnv } from '~/types';
-import { REFRESH_TOKEN_REDIS_TTL, RouteTag } from '~/utils/constants';
+import { REFRESH_TOKEN_REDIS_TTL_SEC, RouteTag } from '~/utils/constants';
 import { generateAccessToken } from '~/utils/jwt';
 import { verifyPassword } from '~/utils/password';
 import { generateRefreshToken } from '~/utils/refreshToken';
@@ -45,11 +45,11 @@ export class AuthLogin extends OpenAPIRoute {
   async handle(c: Context<AppEnv>) {
     const data = await this.getValidatedData<typeof this.schema>();
     const { email, password } = data.body;
+    const log = c.var.logger;
 
-    const log = c.get('log');
     const db = getDB(c.env.AUTH_SERVICE_DB_URL, c.get('dbAppName'));
     const [user] = await timed(
-      `Check existing user with email ${email} in DB`,
+      `Check existing user in DB with email ${email}`,
       db
         .select({
           id: users.id,
@@ -72,15 +72,12 @@ export class AuthLogin extends OpenAPIRoute {
     );
     const refreshToken = generateRefreshToken();
 
-    const redis = new Redis({
-      token: c.env.AUTH_SERVICE_REDIS_TOKEN,
-      url: c.env.AUTH_SERVICE_REDIS_URL,
-    });
+    const redis = getRedis(c.env);
 
     await timed(
       `Store refresh token in Redis for user ${user.id}`,
       redis.set(`refresh:${refreshToken}`, user.id, {
-        ex: REFRESH_TOKEN_REDIS_TTL,
+        ex: REFRESH_TOKEN_REDIS_TTL_SEC,
       }),
       log
     );

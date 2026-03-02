@@ -1,13 +1,15 @@
 import { Scalar } from '@scalar/hono-api-reference';
-import { ApiException, fromHono, InputValidationException } from 'chanfana';
+import { fromHono } from 'chanfana';
 import { Hono } from 'hono';
+import { pinoLogger } from 'hono-pino';
+import { createHandler as debugLog } from 'hono-pino/debug-log';
 import { HTTPException } from 'hono/http-exception';
 import { prettyJSON } from 'hono/pretty-json';
 import { requestId } from 'hono/request-id';
 import { nanoid } from 'nanoid';
+import pino from 'pino';
 
 import { dbAppName } from '~/middleware/dbAppName';
-import { loggerMiddleware } from '~/middleware/logger';
 import { AuthLogin } from '~/routes/auth/login';
 import { AuthLogout } from '~/routes/auth/logout';
 import { AuthRefresh } from '~/routes/auth/refresh';
@@ -18,9 +20,21 @@ import { AppEnv } from '~/types';
 const app = new Hono<AppEnv>();
 
 app.use(requestId({ generator: () => nanoid(8) }));
-app.use(loggerMiddleware);
+app.use(
+  pinoLogger({
+    pino: {
+      base: null,
+      browser: {
+        write: debugLog(),
+      },
+      level: 'debug',
+      timestamp: pino.stdTimeFunctions.epochTime,
+    },
+  })
+);
 app.use(prettyJSON());
 app.use(dbAppName);
+
 app.notFound((c) => c.json({ message: 'Not found', ok: false }, 404));
 app.onError((error, c) => {
   // Chanfana errors arrive as HTTPException with the formatted response attached
@@ -29,9 +43,21 @@ app.onError((error, c) => {
     return (error as HTTPException).getResponse();
   }
 
-  c.get('log').error(error, 'Unknown error during request');
+  c.var.logger.error(error, 'Unknown error during request');
   return c.json({ error: 'Internal server error' }, 500);
 });
+
+// app.use('/auth/*', (c, next) => {
+//   if (['/auth/login', '/auth/refresh', '/auth/signup'].includes(c.req.path)) {
+//     return next();
+//   }
+
+//   const jwtMiddleware = jwt({
+//     alg: 'RS256',
+//     secret: c.env.AUTH_SERVICE_JWT_PUBLIC_KEY,
+//   });
+//   return jwtMiddleware(c, next);
+// });
 
 const openapi = fromHono(app, {
   docs_url: null,

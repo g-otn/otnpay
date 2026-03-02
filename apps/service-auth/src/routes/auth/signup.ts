@@ -23,7 +23,7 @@ export class AuthSignup extends OpenAPIRoute {
       body: contentJson(
         z.object({
           email: z.email(),
-          owner_name: z.string().trim().min(2),
+          ownerName: z.string().trim().min(2),
           password: passwordSchema,
         })
       ),
@@ -44,9 +44,9 @@ export class AuthSignup extends OpenAPIRoute {
 
   async handle(c: Context<AppEnv>) {
     const data = await this.getValidatedData<typeof this.schema>();
-    const { email, owner_name, password } = data.body;
+    const { email, ownerName, password } = data.body;
 
-    const log = c.get('log');
+    const log = c.var.logger;
 
     const db = getDB(c.env.AUTH_SERVICE_DB_URL, c.get('dbAppName'));
 
@@ -61,7 +61,7 @@ export class AuthSignup extends OpenAPIRoute {
         `Create new user ${email} in DB`,
         db
           .insert(users)
-          .values({ email, owner_name, password: hashedPassword })
+          .values({ email, owner_name: ownerName, password: hashedPassword })
           .returning({ id: users.id }),
         log
       );
@@ -75,7 +75,7 @@ export class AuthSignup extends OpenAPIRoute {
         log.info(`Email ${email} already taken`);
         return c.json({ error: 'Email already taken' }, 409);
       }
-      c.get('log').error(error, 'Error while registering new user');
+      c.var.logger.error(error, 'Error while registering new user');
       throw error;
     }
 

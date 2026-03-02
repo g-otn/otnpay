@@ -6,9 +6,9 @@ export enum RouteTag {
 export const SERVICE_NAME = 'auth-service';
 
 export function getDBAppName(requestId: string, version?: string): string {
-  return `${SERVICE_NAME}@${version ?? 'dev'}/${requestId}`;
+  return `${SERVICE_NAME}@${version ?? 'unknown'}/${requestId}`;
 }
 
 export const ACCESS_TOKEN_EXPIRE_TIME = '15min';
 export const REFRESH_TOKEN_EXPIRE_TIME = '30min';
-export const REFRESH_TOKEN_REDIS_TTL = 30 * 60;
+export const REFRESH_TOKEN_REDIS_TTL_SEC = 30 * 60; // Should be the same as JWT exp claim

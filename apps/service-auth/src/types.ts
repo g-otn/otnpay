@@ -4,7 +4,7 @@ export type AppEnv = {
   Bindings: Cloudflare.Env;
   Variables: {
     dbAppName: string;
-    log: Logger;
+    logger: Logger;
     requestId: string;
   };
 };

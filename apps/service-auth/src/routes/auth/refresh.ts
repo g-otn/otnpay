@@ -1,4 +1,4 @@
-import { Redis } from '@upstash/redis/cloudflare';
+import { timed } from '@otnpay/utils';
 import { contentJson, OpenAPIRoute } from 'chanfana';
 import { eq } from 'drizzle-orm';
 import { Context } from 'hono';
@@ -6,16 +6,17 @@ import { z } from 'zod';
 
 import { getDB } from '~/db';
 import { users } from '~/db/schema';
+import { getRedis } from '~/redis';
 import { badRequestResponse, unauthorizedResponse } from '~/routes/schemas';
 import { AppEnv } from '~/types';
-import { REFRESH_TOKEN_REDIS_TTL, RouteTag } from '~/utils/constants';
+import { REFRESH_TOKEN_REDIS_TTL_SEC, RouteTag } from '~/utils/constants';
 import { generateAccessToken } from '~/utils/jwt';
 import { generateRefreshToken } from '~/utils/refreshToken';
 
 export class AuthRefresh extends OpenAPIRoute {
   schema = {
     request: {
-      body: contentJson(z.object({ refresh_token: z.string().min(1) })),
+      body: contentJson(z.object({ refreshToken: z.string().min(1).max(50) })),
     },
     responses: {
       '200': {
@@ -27,39 +28,61 @@ export class AuthRefresh extends OpenAPIRoute {
       ...unauthorizedResponse,
       ...badRequestResponse,
     },
-    summary: 'Exchange refresh token for new access and refresh tokens',
+    summary: 'Exchange refresh token for new token pair',
     tags: [RouteTag.Auth],
   };
 
   async handle(c: Context<AppEnv>) {
     const data = await this.getValidatedData<typeof this.schema>();
-    const { refresh_token: refreshToken } = data.body;
-    const redis = new Redis({
-      token: c.env.AUTH_SERVICE_REDIS_TOKEN,
-      url: c.env.AUTH_SERVICE_REDIS_URL,
-    });
-    const [accountId] = await Promise.all([
-      redis.get<number>(`refresh:${refreshToken}`),
-      redis.del(`refresh:${refreshToken}`),
-    ]);
-    if (!accountId) {
-      return c.json({ error: 'Token revoked' }, 401);
+    const { refreshToken } = data.body;
+    const log = c.var.logger;
+
+    const redis = getRedis(c.env);
+
+    const [userId] = await timed(
+      'Find and delete refresh token from Redis',
+      Promise.all([
+        redis.get<number>(`refresh:${refreshToken}`),
+        redis.del(`refresh:${refreshToken}`),
+      ]),
+      log
+    );
+
+    if (!userId) {
+      return c.json({ error: 'Invalid token' }, 401);
     }
+
     const db = getDB(c.env.AUTH_SERVICE_DB_URL, c.get('dbAppName'));
-    const [account] = await db
-      .select({ account_id: users.account_id, owner_name: users.owner_name })
-      .from(users)
-      .where(eq(users.account_id, accountId))
-      .limit(1);
-    if (!account) {
+
+    const [user] = await timed(
+      `Getting existing user in DB with ID ${users.id}`,
+      db
+        .select({
+          ownerName: users.owner_name,
+        })
+        .from(users)
+        .where(eq(users.id, userId))
+        .limit(1),
+      log
+    );
+
+    if (!user) {
       return c.json({ error: 'Account not found' }, 401);
     }
+
     const newRefreshToken = generateRefreshToken();
     const [newAccessToken] = await Promise.all([
-      generateAccessToken(account, c.env.AUTH_SERVICE_JWT_SECRET),
-      redis.set(`refresh:${newRefreshToken}`, account.account_id, {
-        ex: REFRESH_TOKEN_REDIS_TTL,
-      }),
+      generateAccessToken(
+        { ownerName: user.ownerName, userId },
+        c.env.AUTH_SERVICE_JWT_SECRET
+      ),
+      timed(
+        `Set new refresh token in Redis for user ${userId}`,
+        redis.set(`refresh:${newRefreshToken}`, userId, {
+          ex: REFRESH_TOKEN_REDIS_TTL_SEC,
+        }),
+        log
+      ),
     ]);
     return c.json({
       access_token: newAccessToken,

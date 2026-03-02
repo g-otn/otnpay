@@ -27,12 +27,12 @@
       "type:data"
     ]
   },
-  "dependencies": {
-    "drizzle-orm": "^0.45.1"
+  "peerDependencies": {
+    "drizzle-orm": ">=0.45.1"
   },
   "devDependencies": {
-    "@faker-js/faker": "^10.3.0",
     "drizzle-kit": "^0.31.9",
-    "postgres": "^3.4.8"
+    "postgres": "^3.4.8",
+    "drizzle-orm": "^0.45.1"
   }
 }

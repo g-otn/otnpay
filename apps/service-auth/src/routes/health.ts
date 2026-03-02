@@ -2,6 +2,7 @@ import { contentJson, OpenAPIRoute } from 'chanfana';
 import { Context } from 'hono';
 import { z } from 'zod';
 
+import { AppEnv } from '~/types';
 import { RouteTag } from '~/utils/constants';
 
 export class HealthCheck extends OpenAPIRoute {
@@ -22,14 +23,14 @@ export class HealthCheck extends OpenAPIRoute {
     tags: [RouteTag.System],
   };
 
-  handle(c: Context<{ Bindings: Cloudflare.Env }>) {
+  handle(c: Context<AppEnv>) {
     const meta = c.env.CF_VERSION_METADATA;
     return c.json({
       requestId: c.get('requestId'),
       status: 'ok',
       timestamp: new Date().toISOString(),
-      versionId: meta?.id ?? 'dev',
-      versionTag: meta?.tag ?? 'dev',
+      versionId: meta?.id,
+      versionTag: meta?.tag,
     });
   }
 }
