@@ -16,6 +16,9 @@
       "path": "./libs/api/products"
     },
     {
+      "path": "./libs/db-schema"
+    },
+    {
       "path": "./libs/shared/models"
     },
     {

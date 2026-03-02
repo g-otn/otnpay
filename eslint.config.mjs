@@ -12,6 +12,7 @@ export default [
       '**/test-output',
       '**/out-tsc',
       '**/*.gen.*',
+      '**/.wrangler',
     ],
   },
   {

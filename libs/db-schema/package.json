@@ -1,0 +1,37 @@
+{
+  "name": "@otnpay/db-schema",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "import": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "migrate": "bun run generate && bun run migrate:auth && bun run migrate:account",
+    "generate": "bun run generate:auth && bun run generate:account",
+    "generate:auth": "drizzle-kit generate --config=config/drizzle.auth.config.ts",
+    "generate:account": "drizzle-kit generate --config=config/drizzle.account.config.ts",
+    "migrate:auth": "drizzle-kit migrate --config=config/drizzle.auth.config.ts",
+    "migrate:account": "drizzle-kit migrate --config=config/drizzle.account.config.ts"
+  },
+  "nx": {
+    "tags": [
+      "scope:shared",
+      "type:data"
+    ]
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.45.1"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^10.3.0",
+    "drizzle-kit": "^0.31.9"
+  }
+}

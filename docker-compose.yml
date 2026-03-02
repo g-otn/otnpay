@@ -78,14 +78,50 @@ services:
     networks:
       - auth-net
 
+  auth-redis:
+    image: redis
+    profiles: [auth]
+    ports:
+      - '9002:6379'
+    networks:
+      - auth-net
+    deploy:
+      resources:
+        limits:
+          memory: 128m
+          cpus: '0.25'
+
+  auth-redis-proxy:
+    image: hiett/serverless-redis-http:latest
+    profiles: [auth]
+    ports:
+      - '9003:80'
+    environment:
+      SRH_MODE: env
+      SRH_TOKEN: example_token
+      SRH_CONNECTION_STRING: 'redis://auth-redis:6379'
+    depends_on:
+      - auth-redis
+    networks:
+      - auth-net
+    deploy:
+      resources:
+        limits:
+          memory: 64m
+          cpus: '0.1'
+
   auth-service:
     <<: *worker
     container_name: auth-service
     profiles: [auth]
     ports:
       - '9010:8787'
+    environment:
+      AUTH_SERVICE_REDIS_URL: 'http://auth-redis-proxy'
+      AUTH_SERVICE_REDIS_TOKEN: 'example_token'
     depends_on:
       - auth-db-pgdog
+      - auth-redis-proxy
     networks:
       - auth-net
 
