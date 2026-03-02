@@ -7,11 +7,8 @@ import { z } from 'zod';
 import { getDB } from '~/db';
 import { users } from '~/db/schema';
 import { badRequestResponse, unauthorizedResponse } from '~/routes/schemas';
-import {
-  getDBAppName,
-  REFRESH_TOKEN_REDIS_TTL,
-  RouteTag,
-} from '~/utils/constants';
+import { AppEnv } from '~/types';
+import { REFRESH_TOKEN_REDIS_TTL, RouteTag } from '~/utils/constants';
 import { generateAccessToken } from '~/utils/jwt';
 import { generateRefreshToken } from '~/utils/refreshToken';
 
@@ -34,7 +31,7 @@ export class AuthRefresh extends OpenAPIRoute {
     tags: [RouteTag.Auth],
   };
 
-  async handle(c: Context<{ Bindings: Cloudflare.Env }>) {
+  async handle(c: Context<AppEnv>) {
     const data = await this.getValidatedData<typeof this.schema>();
     const { refresh_token: refreshToken } = data.body;
     const redis = new Redis({
@@ -48,10 +45,7 @@ export class AuthRefresh extends OpenAPIRoute {
     if (!accountId) {
       return c.json({ error: 'Token revoked' }, 401);
     }
-    const db = getDB(
-      c.env.AUTH_SERVICE_DB_URL,
-      getDBAppName(c.get('requestId'), c.env.CF_VERSION_METADATA?.tag)
-    );
+    const db = getDB(c.env.AUTH_SERVICE_DB_URL, c.get('dbAppName'));
     const [account] = await db
       .select({ account_id: users.account_id, owner_name: users.owner_name })
       .from(users)

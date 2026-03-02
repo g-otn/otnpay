@@ -1,6 +1,8 @@
-import { importPKCS8, JWTPayload, jwtVerify, SignJWT } from 'jose';
+import { importPKCS8, importSPKI, JWTPayload, jwtVerify, SignJWT } from 'jose';
 
 import { ACCESS_TOKEN_EXPIRE_TIME } from '~/utils/constants';
+
+const alg = 'RS256';
 
 export async function generateAccessToken(
   {
@@ -16,29 +18,35 @@ export async function generateAccessToken(
    */
   secret: string
 ): Promise<string> {
-  const privateKey = await importPKCS8(secret, 'RS256');
-  return signJwt({ name: ownerName, sub: userId.toString() }, privateKey);
+  const privateKey = await importPKCS8(secret, alg);
+  return signJwt(
+    { name: ownerName, sub: userId.toString() },
+    privateKey,
+    ACCESS_TOKEN_EXPIRE_TIME
+  );
 }
 
 export async function signJwt(
   payload: JWTPayload,
-  key: CryptoKey
+  key: CryptoKey,
+  expirationTime: Date | number | string
 ): Promise<string> {
   return new SignJWT(payload)
-    .setProtectedHeader({ alg: 'RSA256' })
+    .setProtectedHeader({ alg })
     .setIssuedAt()
-    .setExpirationTime(ACCESS_TOKEN_EXPIRE_TIME)
+    .setExpirationTime(expirationTime)
     .sign(key);
 }
 
 export async function verifyJwt<Claims extends Record<string, unknown>>(
   token: string,
-  secret: string
-): Promise<Record<string, unknown>> {
-  const { payload } = await jwtVerify<Claims>(token, secretKey(secret));
+  /**
+   * PEM-encoded SPKI string
+   * RS256 public key
+   */
+  publicKey: string
+): Promise<Claims & JWTPayload> {
+  const key = await importSPKI(publicKey.replaceAll('\\n', '\n'), alg);
+  const { payload } = await jwtVerify<Claims>(token, key);
   return payload;
-}
-
-function secretKey(secret: string): Uint8Array {
-  return new TextEncoder().encode(secret);
 }

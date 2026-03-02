@@ -2,33 +2,38 @@ import { Scalar } from '@scalar/hono-api-reference';
 import { ApiException, fromHono, InputValidationException } from 'chanfana';
 import { Hono } from 'hono';
 import { HTTPException } from 'hono/http-exception';
-import { logger } from 'hono/logger';
 import { prettyJSON } from 'hono/pretty-json';
 import { requestId } from 'hono/request-id';
 import { nanoid } from 'nanoid';
 
+import { dbAppName } from '~/middleware/dbAppName';
+import { requestLogger } from '~/middleware/logger';
 import { AuthLogin } from '~/routes/auth/login';
 import { AuthLogout } from '~/routes/auth/logout';
 import { AuthRefresh } from '~/routes/auth/refresh';
 import { AuthSignup } from '~/routes/auth/signup';
 import { HealthCheck } from '~/routes/health';
+import { AppEnv } from '~/types';
 
-const app = new Hono<{ Bindings: Cloudflare.Env }>();
+const app = new Hono<AppEnv>();
 
 app.use(requestId({ generator: () => nanoid(8) }));
-app.use((c, next) =>
-  logger((...data) => console.log(...data, `[${c.get('requestId')}]`))(c, next)
-);
+app.use(requestLogger);
 app.use(prettyJSON());
+app.use(dbAppName);
 app.notFound((c) => c.json({ message: 'Not found', ok: false }, 404));
 app.onError((error, c) => {
   // Chanfana errors arrive as HTTPException with the formatted response attached
   if (error.constructor.name === 'HTTPException') {
-    // Return chanfana's standard error format
+    // Return chanfana's standard error format (e.g validation errors)
     return (error as HTTPException).getResponse();
   }
 
-  console.error('Unknown error during request', c.get('requestId'), error);
+  console.error(
+    `[${c.get('requestId')}]`,
+    'Unknown error during request',
+    error
+  );
   return c.json({ error: 'Internal server error' }, 500);
 });
 

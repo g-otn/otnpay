@@ -6,15 +6,17 @@ import { z } from 'zod';
 
 import { getDB } from '~/db';
 import { users } from '~/db/schema';
-import { badRequestResponse, unauthorizedResponse } from '~/routes/schemas';
 import {
-  getDBAppName,
-  REFRESH_TOKEN_REDIS_TTL,
-  RouteTag,
-} from '~/utils/constants';
+  badRequestResponse,
+  passwordSchema,
+  unauthorizedResponse,
+} from '~/routes/schemas';
+import { AppEnv } from '~/types';
+import { REFRESH_TOKEN_REDIS_TTL, RouteTag } from '~/utils/constants';
 import { generateAccessToken } from '~/utils/jwt';
 import { verifyPassword } from '~/utils/password';
 import { generateRefreshToken } from '~/utils/refreshToken';
+import { timed } from '~/utils/timed';
 
 export class AuthLogin extends OpenAPIRoute {
   schema = {
@@ -22,7 +24,7 @@ export class AuthLogin extends OpenAPIRoute {
       body: contentJson(
         z.object({
           email: z.email(),
-          password: z.string().min(1),
+          password: passwordSchema,
         })
       ),
     },
@@ -40,14 +42,11 @@ export class AuthLogin extends OpenAPIRoute {
     tags: [RouteTag.Auth],
   };
 
-  async handle(c: Context<{ Bindings: Cloudflare.Env }>) {
+  async handle(c: Context<AppEnv>) {
     const data = await this.getValidatedData<typeof this.schema>();
     const { email, password } = data.body;
 
-    const db = getDB(
-      c.env.AUTH_SERVICE_DB_URL,
-      getDBAppName(c.get('requestId'), c.env.CF_VERSION_METADATA?.tag)
-    );
+    const db = getDB(c.env.AUTH_SERVICE_DB_URL, c.get('dbAppName'));
     const [user] = await db
       .select({
         id: users.id,
@@ -72,9 +71,13 @@ export class AuthLogin extends OpenAPIRoute {
       token: c.env.AUTH_SERVICE_REDIS_TOKEN,
       url: c.env.AUTH_SERVICE_REDIS_URL,
     });
-    await redis.set(`refresh:${refreshToken}`, user.id, {
-      ex: REFRESH_TOKEN_REDIS_TTL,
-    });
+
+    await timed(
+      'Store refresh token in Redis',
+      redis.set(`refresh:${refreshToken}`, user.id, {
+        ex: REFRESH_TOKEN_REDIS_TTL,
+      })
+    );
 
     return c.json({ access_token: accessToken, refresh_token: refreshToken });
   }
