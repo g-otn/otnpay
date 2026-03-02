@@ -1,3 +1,13 @@
+import {
+  defaultOptions,
+  owaspSymbols,
+  passwordStrength,
+} from 'check-password-strength';
+
+export function checkPasswordStrength(password: string) {
+  return passwordStrength(password, defaultOptions, owaspSymbols);
+}
+
 // From https://lord.technology/2024/02/21/hashing-passwords-on-cloudflare-workers.html
 
 export async function hashPassword(

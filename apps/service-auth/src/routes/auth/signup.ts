@@ -1,5 +1,6 @@
 import { Redis } from '@upstash/redis/cloudflare';
 import { contentJson, OpenAPIRoute } from 'chanfana';
+import { owaspSymbols, passwordStrength } from 'check-password-strength';
 import { Context } from 'hono';
 import { z } from 'zod';
 
@@ -15,14 +16,29 @@ import { generateAccessToken } from '~/utils/jwt';
 import { hashPassword } from '~/utils/password';
 import { generateRefreshToken } from '~/utils/refreshToken';
 
+const allowedPasswordChars = new Set(
+  'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789' +
+    owaspSymbols
+);
+
 export class AuthSignup extends OpenAPIRoute {
   schema = {
     request: {
       body: contentJson(
         z.object({
           email: z.email(),
-          owner_name: z.string().min(1),
-          password: z.string().min(8),
+          owner_name: z.string().min(2),
+          password: z
+            .string()
+            .min(8, { abort: true })
+            .max(40, { abort: true })
+            .refine(
+              (p) => [...p].every((c) => allowedPasswordChars.has(c)),
+              `Password may only contain letters, numbers, and symbols: ${owaspSymbols}`
+            )
+            .refine((p) => {
+              return passwordStrength(p, undefined, owaspSymbols).id >= 3;
+            }, 'Password must be strong: at least 12 characters containing uppercase, lowercase, numbers and symbols'),
         })
       ),
     },
