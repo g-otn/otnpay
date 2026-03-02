@@ -1,8 +1,13 @@
 import { createMiddleware } from 'hono/factory';
-import { logger } from 'hono/logger';
+import { logger as honoRequestLogger } from 'hono/logger';
 
 import { AppEnv } from '~/types';
+import { logger } from '~/utils/logger';
 
-export const requestLogger = createMiddleware<AppEnv>((c, next) =>
-  logger((...data) => console.log(`[${c.get('requestId')}]`, ...data))(c, next)
-);
+export const loggerMiddleware = createMiddleware<AppEnv>((c, next) => {
+  const child = logger.child({ requestId: c.get('requestId') });
+  c.set('log', child);
+  return honoRequestLogger((...data) => {
+    child.info(data.join(' '));
+  })(c, next);
+});

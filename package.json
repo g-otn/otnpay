@@ -75,8 +75,8 @@
   },
   "workspaces": [
     "apps/*",
-    "libs/api/products",
     "libs/db-schema",
+    "libs/utils",
     "libs/shared/*",
     "libs/shop/*"
   ]

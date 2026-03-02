@@ -7,7 +7,7 @@ import { requestId } from 'hono/request-id';
 import { nanoid } from 'nanoid';
 
 import { dbAppName } from '~/middleware/dbAppName';
-import { requestLogger } from '~/middleware/logger';
+import { loggerMiddleware } from '~/middleware/logger';
 import { AuthLogin } from '~/routes/auth/login';
 import { AuthLogout } from '~/routes/auth/logout';
 import { AuthRefresh } from '~/routes/auth/refresh';
@@ -18,7 +18,7 @@ import { AppEnv } from '~/types';
 const app = new Hono<AppEnv>();
 
 app.use(requestId({ generator: () => nanoid(8) }));
-app.use(requestLogger);
+app.use(loggerMiddleware);
 app.use(prettyJSON());
 app.use(dbAppName);
 app.notFound((c) => c.json({ message: 'Not found', ok: false }, 404));
@@ -29,11 +29,7 @@ app.onError((error, c) => {
     return (error as HTTPException).getResponse();
   }
 
-  console.error(
-    `[${c.get('requestId')}]`,
-    'Unknown error during request',
-    error
-  );
+  c.get('log').error(error, 'Unknown error during request');
   return c.json({ error: 'Internal server error' }, 500);
 });
 

@@ -1,3 +1,4 @@
+import { timed } from '@otnpay/utils';
 import { Redis } from '@upstash/redis/cloudflare';
 import { contentJson, OpenAPIRoute } from 'chanfana';
 import { eq } from 'drizzle-orm';
@@ -16,7 +17,6 @@ import { REFRESH_TOKEN_REDIS_TTL, RouteTag } from '~/utils/constants';
 import { generateAccessToken } from '~/utils/jwt';
 import { verifyPassword } from '~/utils/password';
 import { generateRefreshToken } from '~/utils/refreshToken';
-import { timed } from '~/utils/timed';
 
 export class AuthLogin extends OpenAPIRoute {
   schema = {
@@ -46,16 +46,21 @@ export class AuthLogin extends OpenAPIRoute {
     const data = await this.getValidatedData<typeof this.schema>();
     const { email, password } = data.body;
 
+    const log = c.get('log');
     const db = getDB(c.env.AUTH_SERVICE_DB_URL, c.get('dbAppName'));
-    const [user] = await db
-      .select({
-        id: users.id,
-        ownerName: users.owner_name,
-        password: users.password,
-      })
-      .from(users)
-      .where(eq(users.email, email))
-      .limit(1);
+    const [user] = await timed(
+      `Check existing user with email ${email} in DB`,
+      db
+        .select({
+          id: users.id,
+          ownerName: users.owner_name,
+          password: users.password,
+        })
+        .from(users)
+        .where(eq(users.email, email))
+        .limit(1),
+      log
+    );
 
     if (!user || !(await verifyPassword(user.password, password))) {
       return c.json({ error: 'Invalid credentials' }, 401);
@@ -73,10 +78,11 @@ export class AuthLogin extends OpenAPIRoute {
     });
 
     await timed(
-      'Store refresh token in Redis',
+      `Store refresh token in Redis for user ${user.id}`,
       redis.set(`refresh:${refreshToken}`, user.id, {
         ex: REFRESH_TOKEN_REDIS_TTL,
-      })
+      }),
+      log
     );
 
     return c.json({ access_token: accessToken, refresh_token: refreshToken });

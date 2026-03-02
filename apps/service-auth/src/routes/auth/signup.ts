@@ -1,5 +1,6 @@
 import type { PostgresError } from 'postgres';
 
+import { timed } from '@otnpay/utils';
 import { contentJson, OpenAPIRoute } from 'chanfana';
 import { DrizzleQueryError } from 'drizzle-orm';
 import { Context } from 'hono';
@@ -22,7 +23,7 @@ export class AuthSignup extends OpenAPIRoute {
       body: contentJson(
         z.object({
           email: z.email(),
-          owner_name: z.string().min(2),
+          owner_name: z.string().trim().min(2),
           password: passwordSchema,
         })
       ),
@@ -45,15 +46,25 @@ export class AuthSignup extends OpenAPIRoute {
     const data = await this.getValidatedData<typeof this.schema>();
     const { email, owner_name, password } = data.body;
 
+    const log = c.get('log');
+
     const db = getDB(c.env.AUTH_SERVICE_DB_URL, c.get('dbAppName'));
 
     let newUser: { id: number };
     try {
-      const hashed = await hashPassword(password);
-      [newUser] = await db
-        .insert(users)
-        .values({ email, owner_name, password: hashed })
-        .returning({ id: users.id });
+      const hashedPassword = await timed(
+        'Hash password',
+        hashPassword(password),
+        log
+      );
+      [newUser] = await timed(
+        'Create new user in DB',
+        db
+          .insert(users)
+          .values({ email, owner_name, password: hashedPassword })
+          .returning({ id: users.id }),
+        log
+      );
     } catch (error) {
       const isUniqueEmailViolation =
         error instanceof DrizzleQueryError &&
@@ -63,7 +74,7 @@ export class AuthSignup extends OpenAPIRoute {
       if (isUniqueEmailViolation) {
         return c.json({ error: 'Email already taken' }, 409);
       }
-      console.error('Error while registering new user:', error);
+      c.get('log').error(error, 'Error while registering new user');
       throw error;
     }
 
