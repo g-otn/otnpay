@@ -1,34 +1,34 @@
-export interface Product {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  category: string;
-  imageUrl: string;
-  inStock: boolean;
-  rating: number;
-  reviewCount: number;
-}
-
 export interface ApiResponse<T> {
   data: T;
-  success: boolean;
-  message?: string;
   error?: string;
+  message?: string;
+  success: boolean;
 }
 
 export interface PaginatedResponse<T> {
   items: T[];
-  total: number;
   page: number;
   pageSize: number;
+  total: number;
   totalPages: number;
+}
+
+export interface Product {
+  category: string;
+  description: string;
+  id: string;
+  imageUrl: string;
+  inStock: boolean;
+  name: string;
+  price: number;
+  rating: number;
+  reviewCount: number;
 }
 
 export interface ProductFilter {
   category?: string;
-  minPrice?: number;
-  maxPrice?: number;
   inStock?: boolean;
+  maxPrice?: number;
+  minPrice?: number;
   searchTerm?: string;
 }

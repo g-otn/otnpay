@@ -1,7 +1,8 @@
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
-import { ProductGrid } from './product-grid';
 import { createMockProductList } from '@otnpay/shared-test-utils';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
+
+import { ProductGrid } from './product-grid';
 
 describe('ProductGrid', () => {
   const mockProducts = createMockProductList(3);
@@ -13,7 +14,7 @@ describe('ProductGrid', () => {
 
   it('should render all products', () => {
     render(
-      <ProductGrid products={mockProducts} onProductSelect={mockOnSelect} />
+      <ProductGrid onProductSelect={mockOnSelect} products={mockProducts} />
     );
 
     expect(screen.getByText('Test Product 1')).toBeInTheDocument();
@@ -22,7 +23,7 @@ describe('ProductGrid', () => {
   });
 
   it('should display empty state when no products', () => {
-    render(<ProductGrid products={[]} onProductSelect={mockOnSelect} />);
+    render(<ProductGrid onProductSelect={mockOnSelect} products={[]} />);
 
     expect(
       screen.getByText('No products found matching your criteria.')
@@ -31,7 +32,7 @@ describe('ProductGrid', () => {
 
   it('should call onProductSelect when a product card is clicked', () => {
     render(
-      <ProductGrid products={mockProducts} onProductSelect={mockOnSelect} />
+      <ProductGrid onProductSelect={mockOnSelect} products={mockProducts} />
     );
 
     const firstCard = screen.getByRole('button', {
@@ -45,7 +46,7 @@ describe('ProductGrid', () => {
 
   it('should have responsive grid layout', () => {
     const { container } = render(
-      <ProductGrid products={mockProducts} onProductSelect={mockOnSelect} />
+      <ProductGrid onProductSelect={mockOnSelect} products={mockProducts} />
     );
 
     // CSS modules generate unique class names, check for element with class containing 'product-grid'

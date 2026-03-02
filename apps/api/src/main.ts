@@ -1,11 +1,11 @@
-import express from 'express';
 import { ProductsService } from '@otnpay/api-products';
 import {
   ApiResponse,
+  PaginatedResponse,
   Product,
   ProductFilter,
-  PaginatedResponse,
 } from '@otnpay/models';
+import express from 'express';
 
 const host = process.env.HOST ?? 'localhost';
 const port = process.env.PORT ? Number(process.env.PORT) : 3333;
@@ -70,8 +70,8 @@ app.get('/api/products', (req, res) => {
   } catch (error) {
     const response: ApiResponse<any> = {
       data: null,
-      success: false,
       error: 'An error occurred while fetching products',
+      success: false,
     };
     res.status(500).json(response);
   }
@@ -88,8 +88,8 @@ app.get('/api/products/categories', (req, res) => {
   } catch (error) {
     const response: ApiResponse<any> = {
       data: null,
-      success: false,
       error: 'An error occurred while fetching categories',
+      success: false,
     };
     res.status(500).json(response);
   }
@@ -102,8 +102,8 @@ app.get('/api/products/:id', (req, res) => {
     if (!product) {
       const response: ApiResponse<any> = {
         data: null,
-        success: false,
         error: 'Product not found',
+        success: false,
       };
       return res.status(404).json(response);
     }
@@ -116,8 +116,8 @@ app.get('/api/products/:id', (req, res) => {
   } catch (error) {
     const response: ApiResponse<any> = {
       data: null,
-      success: false,
       error: 'An error occurred while fetching the product',
+      success: false,
     };
     return res.status(500).json(response);
   }

@@ -51,7 +51,7 @@ describe('ProductsService', () => {
     });
 
     it('should filter products by price range', () => {
-      const filter: ProductFilter = { minPrice: 50, maxPrice: 100 };
+      const filter: ProductFilter = { maxPrice: 100, minPrice: 50 };
       const result = service.getProducts(filter);
 
       result.items.forEach((product) => {

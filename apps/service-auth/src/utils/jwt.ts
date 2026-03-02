@@ -1,9 +1,6 @@
 import { JWTPayload, jwtVerify, SignJWT } from 'jose';
-import { ACCESS_TOKEN_EXPIRE_TIME } from '~/utils/constants';
 
-function secretKey(secret: string): Uint8Array {
-  return new TextEncoder().encode(secret);
-}
+import { ACCESS_TOKEN_EXPIRE_TIME } from '~/utils/constants';
 
 export async function generateAccessToken(
   {
@@ -15,7 +12,7 @@ export async function generateAccessToken(
   },
   secret: string
 ): Promise<string> {
-  return signJwt({ sub: account_id.toString(), name: owner_name }, secret);
+  return signJwt({ name: owner_name, sub: account_id.toString() }, secret);
 }
 
 export async function signJwt(
@@ -35,4 +32,8 @@ export async function verifyJwt<Claims extends Record<string, unknown>>(
 ): Promise<Record<string, unknown>> {
   const { payload } = await jwtVerify<Claims>(token, secretKey(secret));
   return payload;
+}
+
+function secretKey(secret: string): Uint8Array {
+  return new TextEncoder().encode(secret);
 }

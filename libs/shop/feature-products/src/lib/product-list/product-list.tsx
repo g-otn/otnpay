@@ -1,12 +1,13 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Product, ProductFilter } from '@otnpay/models';
-import { useProducts, useCategories } from '@otnpay/shop-data';
+import { useCategories, useProducts } from '@otnpay/shop-data';
 import {
-  ProductGrid,
-  LoadingSpinner,
   ErrorMessage,
+  LoadingSpinner,
+  ProductGrid,
 } from '@otnpay/shop-shared-ui';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+
 import styles from './product-list.module.css';
 
 export function ProductList() {
@@ -20,7 +21,7 @@ export function ProductList() {
   const [filter, setFilter] = useState<ProductFilter>({});
 
   // Fetch data
-  const { products, totalProducts, totalPages, loading, error } = useProducts(
+  const { error, loading, products, totalPages, totalProducts } = useProducts(
     filter,
     currentPage,
     12
@@ -88,19 +89,19 @@ export function ProductList() {
       <div className={styles['filters-section']}>
         <div className={styles['search-box']}>
           <input
-            type="text"
-            placeholder="Search products..."
-            value={searchTerm}
-            onChange={handleSearchChange}
             className={styles['search-input']}
+            onChange={handleSearchChange}
+            placeholder="Search products..."
+            type="text"
+            value={searchTerm}
           />
         </div>
 
         <div className={styles['filter-controls']}>
           <select
-            value={selectedCategory}
-            onChange={handleCategoryChange}
             className={styles['filter-select']}
+            onChange={handleCategoryChange}
+            value={selectedCategory}
           >
             <option value="">All Categories</option>
             {categories.map((category) => (
@@ -112,9 +113,9 @@ export function ProductList() {
 
           <label className={styles['checkbox-label']}>
             <input
-              type="checkbox"
               checked={inStockOnly}
               onChange={handleInStockChange}
+              type="checkbox"
             />
             In Stock Only
           </label>
@@ -132,8 +133,8 @@ export function ProductList() {
           </div>
 
           <ProductGrid
-            products={products}
             onProductSelect={handleProductSelect}
+            products={products}
           />
 
           {totalPages > 1 && (

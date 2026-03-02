@@ -1,12 +1,15 @@
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
+
 import { ErrorMessage } from './error-message';
 
 describe('ErrorMessage', () => {
   it('should display default message when no message prop provided', () => {
     render(<ErrorMessage />);
 
-    expect(screen.getByText('An error occurred. Please try again.')).toBeInTheDocument();
+    expect(
+      screen.getByText('An error occurred. Please try again.')
+    ).toBeInTheDocument();
   });
 
   it('should display custom error message', () => {

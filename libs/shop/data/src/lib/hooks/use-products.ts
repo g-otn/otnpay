@@ -1,19 +1,62 @@
-import { useState, useEffect } from 'react';
 import {
-  Product,
   ApiResponse,
   PaginatedResponse,
+  Product,
   ProductFilter,
 } from '@otnpay/models';
+import { useEffect, useState } from 'react';
 
 const API_URL = 'http://localhost:3333/api';
+
+export function useCategories() {
+  const [categories, setCategories] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<null | string>(null);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      setLoading(true);
+      setError(null);
+
+      try {
+        const response = await fetch(`${API_URL}/products/categories`);
+        const data: ApiResponse<string[]> =
+          (await response.json()) as ApiResponse<string[]>;
+
+        if (!data.success) {
+          throw new Error(data.error || 'Failed to load categories');
+        }
+
+        setCategories(data.data);
+      } catch (err) {
+        const message =
+          err instanceof Error
+            ? err.message
+            : 'An error occurred while loading categories';
+        setError(message);
+        console.error('Error loading categories:', err);
+        setCategories([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  return {
+    categories,
+    error,
+    loading,
+  };
+}
 
 export function useProducts(filter?: ProductFilter, page = 1, pageSize = 12) {
   const [products, setProducts] = useState<Product[]>([]);
   const [totalProducts, setTotalProducts] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<null | string>(null);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -67,53 +110,10 @@ export function useProducts(filter?: ProductFilter, page = 1, pageSize = 12) {
   }, [filter, page, pageSize]);
 
   return {
+    error,
+    loading,
     products,
-    totalProducts,
     totalPages,
-    loading,
-    error,
-  };
-}
-
-export function useCategories() {
-  const [categories, setCategories] = useState<string[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchCategories = async () => {
-      setLoading(true);
-      setError(null);
-
-      try {
-        const response = await fetch(`${API_URL}/products/categories`);
-        const data: ApiResponse<string[]> =
-          (await response.json()) as ApiResponse<string[]>;
-
-        if (!data.success) {
-          throw new Error(data.error || 'Failed to load categories');
-        }
-
-        setCategories(data.data);
-      } catch (err) {
-        const message =
-          err instanceof Error
-            ? err.message
-            : 'An error occurred while loading categories';
-        setError(message);
-        console.error('Error loading categories:', err);
-        setCategories([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCategories();
-  }, []);
-
-  return {
-    categories,
-    loading,
-    error,
+    totalProducts,
   };
 }

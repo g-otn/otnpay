@@ -1,13 +1,14 @@
 import { Product } from '@otnpay/models';
+
 import { ProductCard } from '../product-card/product-card';
 import styles from './product-grid.module.css';
 
 interface ProductGridProps {
-  products: Product[];
   onProductSelect: (product: Product) => void;
+  products: Product[];
 }
 
-export function ProductGrid({ products, onProductSelect }: ProductGridProps) {
+export function ProductGrid({ onProductSelect, products }: ProductGridProps) {
   if (products.length === 0) {
     return (
       <div className={styles['empty-state']}>
@@ -21,8 +22,8 @@ export function ProductGrid({ products, onProductSelect }: ProductGridProps) {
       {products.map((product) => (
         <ProductCard
           key={product.id}
-          product={product}
           onProductClick={onProductSelect}
+          product={product}
         />
       ))}
     </div>

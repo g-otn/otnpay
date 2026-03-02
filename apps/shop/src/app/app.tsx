@@ -1,6 +1,7 @@
-import { lazy, Suspense } from 'react';
-import { Route, Routes, Navigate } from 'react-router-dom';
 import { LoadingSpinner } from '@otnpay/shop-shared-ui';
+import { lazy, Suspense } from 'react';
+import { Navigate, Route, Routes } from 'react-router-dom';
+
 import './app.css';
 
 // Lazy load feature components
@@ -27,10 +28,10 @@ export function App() {
       <main className="app-main">
         <Suspense fallback={<LoadingSpinner />}>
           <Routes>
-            <Route path="/" element={<Navigate to="/products" replace />} />
-            <Route path="/products" element={<ProductList />} />
-            <Route path="/products/:id" element={<ProductDetail />} />
-            <Route path="*" element={<Navigate to="/products" replace />} />
+            <Route element={<Navigate replace to="/products" />} path="/" />
+            <Route element={<ProductList />} path="/products" />
+            <Route element={<ProductDetail />} path="/products/:id" />
+            <Route element={<Navigate replace to="/products" />} path="*" />
           </Routes>
         </Suspense>
       </main>

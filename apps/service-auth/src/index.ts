@@ -4,6 +4,7 @@ import { Hono } from 'hono';
 import { logger } from 'hono/logger';
 import { prettyJSON } from 'hono/pretty-json';
 import { requestId } from 'hono/request-id';
+
 import { AuthLogin } from '~/routes/auth/login';
 import { AuthLogout } from '~/routes/auth/logout';
 import { AuthRefresh } from '~/routes/auth/refresh';
@@ -42,24 +43,24 @@ openapi.get('/health', HealthCheck);
 app.get(
   '/scalar',
   Scalar({
-    url: '/doc',
-    servers: [
-      { url: 'http://localhost:9010', description: 'Local server' },
-      {
-        url: 'https://otnpay-auth-service.g0tn.workers.dev',
-        description: 'Deployed server',
-      },
-    ],
     expandAllModelSections: true,
     expandAllResponses: true,
+    servers: [
+      { description: 'Local server', url: 'http://localhost:9010' },
+      {
+        description: 'Deployed server',
+        url: 'https://otnpay-auth-service.g0tn.workers.dev',
+      },
+    ],
+    url: '/doc',
   })
 );
 
 openapi.registry.registerComponent('securitySchemes', 'bearerAuth', {
-  type: 'http',
-  scheme: 'bearer',
   bearerFormat: 'JWT',
   description: 'Access token received from login or refresh endpoints',
+  scheme: 'bearer',
+  type: 'http',
 });
 
 export default app;

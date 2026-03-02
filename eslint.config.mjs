@@ -1,9 +1,11 @@
-import nx from '@nx/eslint-plugin';
+import nx from '@nx/eslint-plugin'; // eslint.config.js
+import perfectionist from 'eslint-plugin-perfectionist';
 
 export default [
   ...nx.configs['flat/base'],
   ...nx.configs['flat/typescript'],
   ...nx.configs['flat/javascript'],
+  perfectionist.configs['recommended-natural'],
   {
     ignores: [
       '**/dist',

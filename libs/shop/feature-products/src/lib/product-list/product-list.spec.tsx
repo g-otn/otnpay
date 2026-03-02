@@ -1,35 +1,36 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { vi, describe, it, expect, beforeEach } from 'vitest';
+import { useCategories, useProducts } from '@otnpay/shop-data';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { ProductList } from './product-list';
-import { useProducts, useCategories } from '@otnpay/shop-data';
 
 // Mock the hooks
 vi.mock('@otnpay/shop-data', () => ({
-  useProducts: vi.fn(),
   useCategories: vi.fn(),
+  useProducts: vi.fn(),
 }));
 
 const mockProducts = [
   {
-    id: '1',
-    name: 'Wireless Headphones',
-    description: 'High-quality wireless headphones',
-    price: 99.99,
     category: 'Electronics',
+    description: 'High-quality wireless headphones',
+    id: '1',
     imageUrl: 'https://via.placeholder.com/300x200',
     inStock: true,
+    name: 'Wireless Headphones',
+    price: 99.99,
     rating: 4.5,
     reviewCount: 120,
   },
   {
-    id: '2',
-    name: 'Running Shoes',
-    description: 'Comfortable running shoes',
-    price: 79.99,
     category: 'Sports',
+    description: 'Comfortable running shoes',
+    id: '2',
     imageUrl: 'https://via.placeholder.com/300x200',
     inStock: true,
+    name: 'Running Shoes',
+    price: 79.99,
     rating: 4.2,
     reviewCount: 85,
   },
@@ -42,16 +43,16 @@ describe('ProductList', () => {
 
   it('should render loading state initially', () => {
     (useProducts as any).mockReturnValue({
-      products: [],
-      loading: true,
       error: null,
-      totalProducts: 0,
+      loading: true,
+      products: [],
       totalPages: 1,
+      totalProducts: 0,
     });
     (useCategories as any).mockReturnValue({
       categories: [],
-      loading: true,
       error: null,
+      loading: true,
     });
 
     render(
@@ -65,16 +66,16 @@ describe('ProductList', () => {
 
   it('should render error state when products fail to load', () => {
     (useProducts as any).mockReturnValue({
-      products: [],
-      loading: false,
       error: 'Failed to load products',
-      totalProducts: 0,
+      loading: false,
+      products: [],
       totalPages: 1,
+      totalProducts: 0,
     });
     (useCategories as any).mockReturnValue({
       categories: ['Electronics', 'Sports'],
-      loading: false,
       error: null,
+      loading: false,
     });
 
     render(
@@ -88,16 +89,16 @@ describe('ProductList', () => {
 
   it('should render products when loaded', () => {
     (useProducts as any).mockReturnValue({
-      products: mockProducts,
-      loading: false,
       error: null,
-      totalProducts: 2,
+      loading: false,
+      products: mockProducts,
       totalPages: 1,
+      totalProducts: 2,
     });
     (useCategories as any).mockReturnValue({
       categories: ['Electronics', 'Sports'],
-      loading: false,
       error: null,
+      loading: false,
     });
 
     render(
@@ -115,17 +116,17 @@ describe('ProductList', () => {
   it('should handle search input', async () => {
     const mockUseProducts = vi.fn();
     mockUseProducts.mockReturnValue({
-      products: mockProducts,
-      loading: false,
       error: null,
-      totalProducts: 2,
+      loading: false,
+      products: mockProducts,
       totalPages: 1,
+      totalProducts: 2,
     });
     (useProducts as any).mockImplementation(mockUseProducts);
     (useCategories as any).mockReturnValue({
       categories: ['Electronics', 'Sports'],
-      loading: false,
       error: null,
+      loading: false,
     });
 
     render(
@@ -149,17 +150,17 @@ describe('ProductList', () => {
   it('should handle category filter', async () => {
     const mockUseProducts = vi.fn();
     mockUseProducts.mockReturnValue({
-      products: mockProducts,
-      loading: false,
       error: null,
-      totalProducts: 2,
+      loading: false,
+      products: mockProducts,
       totalPages: 1,
+      totalProducts: 2,
     });
     (useProducts as any).mockImplementation(mockUseProducts);
     (useCategories as any).mockReturnValue({
       categories: ['Electronics', 'Sports'],
-      loading: false,
       error: null,
+      loading: false,
     });
 
     render(
@@ -183,17 +184,17 @@ describe('ProductList', () => {
   it('should handle in stock filter', async () => {
     const mockUseProducts = vi.fn();
     mockUseProducts.mockReturnValue({
-      products: mockProducts,
-      loading: false,
       error: null,
-      totalProducts: 2,
+      loading: false,
+      products: mockProducts,
       totalPages: 1,
+      totalProducts: 2,
     });
     (useProducts as any).mockImplementation(mockUseProducts);
     (useCategories as any).mockReturnValue({
       categories: ['Electronics', 'Sports'],
-      loading: false,
       error: null,
+      loading: false,
     });
 
     render(
@@ -217,17 +218,17 @@ describe('ProductList', () => {
   it('should handle pagination', async () => {
     const mockUseProducts = vi.fn();
     mockUseProducts.mockReturnValue({
-      products: mockProducts,
-      loading: false,
       error: null,
-      totalProducts: 25,
+      loading: false,
+      products: mockProducts,
       totalPages: 3,
+      totalProducts: 25,
     });
     (useProducts as any).mockImplementation(mockUseProducts);
     (useCategories as any).mockReturnValue({
       categories: ['Electronics', 'Sports'],
-      loading: false,
       error: null,
+      loading: false,
     });
 
     render(
@@ -246,16 +247,16 @@ describe('ProductList', () => {
 
   it('should navigate to product detail when card is clicked', () => {
     (useProducts as any).mockReturnValue({
-      products: mockProducts,
-      loading: false,
       error: null,
-      totalProducts: 2,
+      loading: false,
+      products: mockProducts,
       totalPages: 1,
+      totalProducts: 2,
     });
     (useCategories as any).mockReturnValue({
       categories: ['Electronics', 'Sports'],
-      loading: false,
       error: null,
+      loading: false,
     });
 
     const { container } = render(

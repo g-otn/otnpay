@@ -1,9 +1,10 @@
-import { render, screen } from '@testing-library/react';
-import { vi, describe, it, expect, beforeEach } from 'vitest';
-import { BrowserRouter } from 'react-router-dom';
-import { ProductDetail } from './product-detail';
 import { useProduct } from '@otnpay/shop-data';
-import { useParams, useNavigate } from 'react-router-dom';
+import { render, screen } from '@testing-library/react';
+import { BrowserRouter } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { ProductDetail } from './product-detail';
 
 // Mock the hooks
 vi.mock('@otnpay/shop-data', () => ({
@@ -14,20 +15,20 @@ vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom');
   return {
     ...actual,
-    useParams: vi.fn(),
     useNavigate: vi.fn(),
+    useParams: vi.fn(),
   };
 });
 
 const mockProduct = {
-  id: '1',
-  name: 'Wireless Bluetooth Headphones',
+  category: 'Electronics',
   description:
     'Premium wireless headphones with active noise cancellation and 30-hour battery life.',
-  price: 99.99,
-  category: 'Electronics',
+  id: '1',
   imageUrl: 'https://via.placeholder.com/600x400',
   inStock: true,
+  name: 'Wireless Bluetooth Headphones',
+  price: 99.99,
   rating: 4.5,
   reviewCount: 120,
 };
@@ -43,9 +44,9 @@ describe('ProductDetail', () => {
 
   it('should render loading state initially', () => {
     (useProduct as any).mockReturnValue({
-      product: null,
-      loading: true,
       error: null,
+      loading: true,
+      product: null,
     });
 
     render(
@@ -59,9 +60,9 @@ describe('ProductDetail', () => {
 
   it('should render error state when product fails to load', () => {
     (useProduct as any).mockReturnValue({
-      product: null,
-      loading: false,
       error: 'Failed to load product',
+      loading: false,
+      product: null,
     });
 
     render(
@@ -75,9 +76,9 @@ describe('ProductDetail', () => {
 
   it('should render product not found when product is null', () => {
     (useProduct as any).mockReturnValue({
-      product: null,
-      loading: false,
       error: null,
+      loading: false,
+      product: null,
     });
 
     render(
@@ -91,9 +92,9 @@ describe('ProductDetail', () => {
 
   it('should render product details when loaded', () => {
     (useProduct as any).mockReturnValue({
-      product: mockProduct,
-      loading: false,
       error: null,
+      loading: false,
+      product: mockProduct,
     });
 
     render(
@@ -119,9 +120,9 @@ describe('ProductDetail', () => {
   it('should render out of stock state correctly', () => {
     const outOfStockProduct = { ...mockProduct, inStock: false };
     (useProduct as any).mockReturnValue({
-      product: outOfStockProduct,
-      loading: false,
       error: null,
+      loading: false,
+      product: outOfStockProduct,
     });
 
     render(
@@ -139,9 +140,9 @@ describe('ProductDetail', () => {
 
   it('should display product details section', () => {
     (useProduct as any).mockReturnValue({
-      product: mockProduct,
-      loading: false,
       error: null,
+      loading: false,
+      product: mockProduct,
     });
 
     render(
@@ -161,9 +162,9 @@ describe('ProductDetail', () => {
 
   it('should handle back button click', () => {
     (useProduct as any).mockReturnValue({
-      product: mockProduct,
-      loading: false,
       error: null,
+      loading: false,
+      product: mockProduct,
     });
 
     render(
@@ -182,9 +183,9 @@ describe('ProductDetail', () => {
 
   it('should fetch product with correct id from params', () => {
     const mockUseProduct = vi.fn().mockReturnValue({
-      product: mockProduct,
-      loading: false,
       error: null,
+      loading: false,
+      product: mockProduct,
     });
     (useProduct as any).mockImplementation(mockUseProduct);
     (useParams as any).mockReturnValue({ id: '42' });
@@ -200,9 +201,9 @@ describe('ProductDetail', () => {
 
   it('should render product image with alt text', () => {
     (useProduct as any).mockReturnValue({
-      product: mockProduct,
-      loading: false,
       error: null,
+      loading: false,
+      product: mockProduct,
     });
 
     render(

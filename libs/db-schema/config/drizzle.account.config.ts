@@ -8,6 +8,6 @@ export default defineConfig({
     ? { dbCredentials: { url: ACCOUNT_SERVICE_MIGRATION_DB_URL } }
     : {}),
   dialect: 'postgresql',
-  schema: './src/account/schema.ts',
   out: './migrations/account',
+  schema: './src/account/schema.ts',
 });

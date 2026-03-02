@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
 test.describe('Product Listing Page', () => {
   test.beforeEach(async ({ page }) => {
@@ -6,7 +6,9 @@ test.describe('Product Listing Page', () => {
     await page.waitForLoadState('domcontentloaded');
   });
 
-  test('should display products grid with at least one product', async ({ page }) => {
+  test('should display products grid with at least one product', async ({
+    page,
+  }) => {
     // Wait for products to load
     await page.waitForSelector('[class*="product-card"]', { timeout: 10000 });
 
@@ -33,7 +35,9 @@ test.describe('Product Listing Page', () => {
 
     await page.waitForTimeout(500);
 
-    const productCategories = page.locator('[class*="product-card"] p:first-of-type');
+    const productCategories = page.locator(
+      '[class*="product-card"] p:first-of-type'
+    );
     const count = await productCategories.count();
 
     for (let i = 0; i < count; i++) {
@@ -68,7 +72,9 @@ test.describe('Product Listing Page', () => {
     expect(count).toBe(0);
   });
 
-  test('should navigate to product detail when clicking a product', async ({ page }) => {
+  test('should navigate to product detail when clicking a product', async ({
+    page,
+  }) => {
     const firstProduct = page.locator('[class*="product-card"]').first();
     await firstProduct.click();
 
@@ -79,7 +85,9 @@ test.describe('Product Listing Page', () => {
     await expect(backButton).toBeVisible();
   });
 
-  test('should display pagination controls when there are multiple pages', async ({ page }) => {
+  test('should display pagination controls when there are multiple pages', async ({
+    page,
+  }) => {
     const paginationSection = page.locator('[class*="pagination"]');
 
     if (await paginationSection.isVisible()) {

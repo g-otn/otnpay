@@ -3,8 +3,10 @@ import { contentJson, OpenAPIRoute } from 'chanfana';
 import { eq } from 'drizzle-orm';
 import { Context } from 'hono';
 import { z } from 'zod';
+
 import { getDB } from '~/db';
 import { user } from '~/db/schema';
+import { badRequestResponse, unauthorizedResponse } from '~/routes/schemas';
 import {
   getDBAppName,
   REFRESH_TOKEN_REDIS_TTL,
@@ -12,12 +14,9 @@ import {
 } from '~/utils/constants';
 import { generateAccessToken } from '~/utils/jwt';
 import { generateRefreshToken } from '~/utils/refreshToken';
-import { badRequestResponse, unauthorizedResponse } from '~/routes/schemas';
 
 export class AuthRefresh extends OpenAPIRoute {
   schema = {
-    tags: [RouteTag.Auth],
-    summary: 'Exchange refresh token for new access and refresh tokens',
     request: {
       body: contentJson(z.object({ refresh_token: z.string().min(1) })),
     },
@@ -31,6 +30,8 @@ export class AuthRefresh extends OpenAPIRoute {
       ...unauthorizedResponse,
       ...badRequestResponse,
     },
+    summary: 'Exchange refresh token for new access and refresh tokens',
+    tags: [RouteTag.Auth],
   };
 
   async handle(c: Context<{ Bindings: Cloudflare.Env }>) {
@@ -39,8 +40,8 @@ export class AuthRefresh extends OpenAPIRoute {
     const { refresh_token: refreshToken } = data.body;
 
     const redis = new Redis({
-      url: c.env.AUTH_SERVICE_REDIS_URL,
       token: c.env.AUTH_SERVICE_REDIS_TOKEN,
+      url: c.env.AUTH_SERVICE_REDIS_URL,
     });
     const [accountId] = await Promise.all([
       redis.get<number>(`refresh:${refreshToken}`),

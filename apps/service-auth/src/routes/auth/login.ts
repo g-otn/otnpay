@@ -3,8 +3,10 @@ import { contentJson, OpenAPIRoute } from 'chanfana';
 import { eq } from 'drizzle-orm';
 import { Context } from 'hono';
 import { z } from 'zod';
+
 import { getDB } from '~/db';
 import { user } from '~/db/schema';
+import { badRequestResponse, unauthorizedResponse } from '~/routes/schemas';
 import {
   getDBAppName,
   REFRESH_TOKEN_REDIS_TTL,
@@ -13,12 +15,9 @@ import {
 import { generateAccessToken } from '~/utils/jwt';
 import { verifyPassword } from '~/utils/password';
 import { generateRefreshToken } from '~/utils/refreshToken';
-import { badRequestResponse, unauthorizedResponse } from '~/routes/schemas';
 
 export class AuthLogin extends OpenAPIRoute {
   schema = {
-    tags: [RouteTag.Auth],
-    summary: 'Login with email and password',
     request: {
       body: contentJson(
         z.object({
@@ -37,6 +36,8 @@ export class AuthLogin extends OpenAPIRoute {
       ...badRequestResponse,
       ...unauthorizedResponse,
     },
+    summary: 'Login with email and password',
+    tags: [RouteTag.Auth],
   };
 
   async handle(c: Context<{ Bindings: Cloudflare.Env }>) {
@@ -64,8 +65,8 @@ export class AuthLogin extends OpenAPIRoute {
     const refreshToken = generateRefreshToken();
 
     const redis = new Redis({
-      url: c.env.AUTH_SERVICE_REDIS_URL,
       token: c.env.AUTH_SERVICE_REDIS_TOKEN,
+      url: c.env.AUTH_SERVICE_REDIS_URL,
     });
     await redis.set(`refresh:${refreshToken}`, account.account_id, {
       ex: REFRESH_TOKEN_REDIS_TTL,

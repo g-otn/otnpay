@@ -7,6 +7,6 @@ export default defineConfig({
     ? { dbCredentials: { url: AUTH_SERVICE_MIGRATION_DB_URL } }
     : {}),
   dialect: 'postgresql',
-  schema: './src/auth/schema.ts',
   out: './migrations/auth',
+  schema: './src/auth/schema.ts',
 });

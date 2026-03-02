@@ -1,12 +1,13 @@
-import { useParams, useNavigate } from 'react-router-dom';
 import { useProduct } from '@otnpay/shop-data';
-import { LoadingSpinner, ErrorMessage } from '@otnpay/shop-shared-ui';
+import { ErrorMessage, LoadingSpinner } from '@otnpay/shop-shared-ui';
+import { useNavigate, useParams } from 'react-router-dom';
+
 import styles from './product-detail.module.css';
 
 export function ProductDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { product, loading, error } = useProduct(id);
+  const { error, loading, product } = useProduct(id);
 
   const handleBackClick = () => {
     navigate('/products');
@@ -51,7 +52,7 @@ export function ProductDetail() {
 
       <div className={styles['product-detail']}>
         <div className={styles['product-image']}>
-          <img src={product.imageUrl} alt={product.name} />
+          <img alt={product.name} src={product.imageUrl} />
           {!product.inStock && (
             <div className={styles['out-of-stock-overlay']}>Out of Stock</div>
           )}
@@ -64,7 +65,7 @@ export function ProductDetail() {
           <div className={styles['product-rating']}>
             <span className={styles['stars']}>
               {getStars().map((filled, index) => (
-                <span key={index} className={filled ? styles['filled'] : ''}>
+                <span className={filled ? styles['filled'] : ''} key={index}>
                   ★
                 </span>
               ))}
@@ -94,8 +95,8 @@ export function ProductDetail() {
           <div className={styles['product-actions']}>
             <button
               className={styles['add-to-cart-btn']}
-              onClick={handleAddToCart}
               disabled={!product.inStock}
+              onClick={handleAddToCart}
             >
               {product.inStock ? 'Add to Cart' : 'Out of Stock'}
             </button>

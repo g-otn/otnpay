@@ -1,12 +1,13 @@
 import { Product } from '@otnpay/models';
+
 import styles from './product-card.module.css';
 
 interface ProductCardProps {
-  product: Product;
   onProductClick: (product: Product) => void;
+  product: Product;
 }
 
-export function ProductCard({ product, onProductClick }: ProductCardProps) {
+export function ProductCard({ onProductClick, product }: ProductCardProps) {
   const getStars = () => {
     const stars = [];
     for (let i = 0; i < 5; i++) {
@@ -24,17 +25,17 @@ export function ProductCard({ product, onProductClick }: ProductCardProps) {
 
   return (
     <div
+      aria-label={`View details for ${product.name}`}
       className={`${styles['product-card']} ${
         !product.inStock ? styles['out-of-stock'] : ''
       }`}
       onClick={() => onProductClick(product)}
       onKeyDown={handleKeyDown}
-      tabIndex={0}
       role="button"
-      aria-label={`View details for ${product.name}`}
+      tabIndex={0}
     >
       <div className={styles['product-image']}>
-        <img src={product.imageUrl} alt={product.name} />
+        <img alt={product.name} src={product.imageUrl} />
         {!product.inStock && (
           <div className={styles['out-of-stock-overlay']}>Out of Stock</div>
         )}
@@ -45,7 +46,7 @@ export function ProductCard({ product, onProductClick }: ProductCardProps) {
         <div className={styles['product-rating']}>
           <span className={styles['stars']}>
             {getStars().map((filled, index) => (
-              <span key={index} className={filled ? styles['filled'] : ''}>
+              <span className={filled ? styles['filled'] : ''} key={index}>
                 ★
               </span>
             ))}

@@ -1,12 +1,12 @@
-import { useState, useEffect } from 'react';
-import { Product, ApiResponse } from '@otnpay/models';
+import { ApiResponse, Product } from '@otnpay/models';
+import { useEffect, useState } from 'react';
 
 const API_URL = 'http://localhost:3333/api';
 
 export function useProduct(id: string | undefined) {
-  const [product, setProduct] = useState<Product | null>(null);
+  const [product, setProduct] = useState<null | Product>(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<null | string>(null);
 
   useEffect(() => {
     if (!id) {
@@ -45,8 +45,8 @@ export function useProduct(id: string | undefined) {
   }, [id]);
 
   return {
-    product,
-    loading,
     error,
+    loading,
+    product,
   };
 }

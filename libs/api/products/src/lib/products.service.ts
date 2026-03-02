@@ -4,162 +4,171 @@ import { Product, ProductFilter } from '@otnpay/models';
 export class ProductsService {
   private products: Product[] = [
     {
-      id: '1',
-      name: 'Wireless Bluetooth Headphones',
+      category: 'Electronics',
       description:
         'Premium quality wireless headphones with active noise cancellation, 30-hour battery life, and superior sound quality.',
-      price: 199.99,
-      category: 'Electronics',
+      id: '1',
       imageUrl:
         'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500',
       inStock: true,
+      name: 'Wireless Bluetooth Headphones',
+      price: 199.99,
       rating: 4.5,
       reviewCount: 234,
     },
     {
-      id: '2',
-      name: 'Smart Watch Pro',
+      category: 'Electronics',
       description:
         'Advanced fitness tracking, heart rate monitoring, GPS, and smartphone integration in a sleek design.',
-      price: 349.99,
-      category: 'Electronics',
+      id: '2',
       imageUrl:
         'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500',
       inStock: true,
+      name: 'Smart Watch Pro',
+      price: 349.99,
       rating: 4.3,
       reviewCount: 189,
     },
     {
-      id: '3',
-      name: 'Organic Cotton T-Shirt',
+      category: 'Clothing',
       description:
         'Comfortable and sustainable organic cotton t-shirt, perfect for everyday wear.',
-      price: 29.99,
-      category: 'Clothing',
+      id: '3',
       imageUrl:
         'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500',
       inStock: false,
+      name: 'Organic Cotton T-Shirt',
+      price: 29.99,
       rating: 4.7,
       reviewCount: 92,
     },
     {
-      id: '4',
-      name: 'Stainless Steel Water Bottle',
+      category: 'Home & Kitchen',
       description:
         'Insulated water bottle that keeps drinks cold for 24 hours or hot for 12 hours.',
-      price: 24.99,
-      category: 'Home & Kitchen',
+      id: '4',
       imageUrl:
         'https://images.unsplash.com/photo-1602143407151-7111542de6e8?w=500',
       inStock: true,
+      name: 'Stainless Steel Water Bottle',
+      price: 24.99,
       rating: 4.6,
       reviewCount: 412,
     },
     {
-      id: '5',
-      name: 'Yoga Mat Premium',
+      category: 'Sports',
       description:
         'Non-slip, eco-friendly yoga mat with extra cushioning for comfortable practice.',
-      price: 45.99,
-      category: 'Sports',
+      id: '5',
       imageUrl:
         'https://images.unsplash.com/photo-1601925260368-ae2f83cf8b7f?w=500',
       inStock: true,
+      name: 'Yoga Mat Premium',
+      price: 45.99,
       rating: 4.4,
       reviewCount: 156,
     },
     {
-      id: '6',
-      name: 'Portable Charger 20000mAh',
+      category: 'Electronics',
       description:
         'High-capacity power bank with fast charging and multiple USB ports.',
-      price: 59.99,
-      category: 'Electronics',
+      id: '6',
       imageUrl:
         'https://images.unsplash.com/photo-1609091839311-d5365f9ff1c5?w=500',
       inStock: true,
+      name: 'Portable Charger 20000mAh',
+      price: 59.99,
       rating: 4.2,
       reviewCount: 298,
     },
     {
-      id: '7',
-      name: 'Running Shoes Elite',
+      category: 'Sports',
       description:
         'Professional running shoes with advanced cushioning and breathable mesh upper.',
-      price: 129.99,
-      category: 'Sports',
+      id: '7',
       imageUrl:
         'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500',
       inStock: true,
+      name: 'Running Shoes Elite',
+      price: 129.99,
       rating: 4.8,
       reviewCount: 523,
     },
     {
-      id: '8',
-      name: 'Coffee Maker Deluxe',
+      category: 'Home & Kitchen',
       description:
         'Programmable coffee maker with thermal carafe and customizable brew strength.',
-      price: 89.99,
-      category: 'Home & Kitchen',
+      id: '8',
       imageUrl:
         'https://images.unsplash.com/photo-1517668808822-9ebb02f2a0e6?w=500',
       inStock: false,
+      name: 'Coffee Maker Deluxe',
+      price: 89.99,
       rating: 4.1,
       reviewCount: 167,
     },
     {
-      id: '9',
-      name: 'Backpack Urban Explorer',
+      category: 'Accessories',
       description:
         'Durable and stylish backpack with laptop compartment and multiple pockets.',
-      price: 79.99,
-      category: 'Accessories',
+      id: '9',
       imageUrl:
         'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=500',
       inStock: true,
+      name: 'Backpack Urban Explorer',
+      price: 79.99,
       rating: 4.5,
       reviewCount: 201,
     },
     {
-      id: '10',
-      name: 'Wireless Keyboard and Mouse',
+      category: 'Electronics',
       description:
         'Ergonomic wireless keyboard and mouse combo with long battery life.',
-      price: 69.99,
-      category: 'Electronics',
+      id: '10',
       imageUrl:
         'https://images.unsplash.com/photo-1587829741301-dc798b83add3?w=500',
       inStock: true,
+      name: 'Wireless Keyboard and Mouse',
+      price: 69.99,
       rating: 4.3,
       reviewCount: 145,
     },
     {
-      id: '11',
-      name: 'Sunglasses Polarized',
+      category: 'Accessories',
       description:
         'UV protection polarized sunglasses with stylish frame design.',
-      price: 149.99,
-      category: 'Accessories',
+      id: '11',
       imageUrl:
         'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=500',
       inStock: true,
+      name: 'Sunglasses Polarized',
+      price: 149.99,
       rating: 4.6,
       reviewCount: 89,
     },
     {
-      id: '12',
-      name: 'Desk Lamp LED',
+      category: 'Home & Kitchen',
       description:
         'Adjustable LED desk lamp with touch controls and multiple brightness levels.',
-      price: 39.99,
-      category: 'Home & Kitchen',
+      id: '12',
       imageUrl:
         'https://images.unsplash.com/photo-1565306257569-4eb0e3c41b24?w=500',
       inStock: true,
+      name: 'Desk Lamp LED',
+      price: 39.99,
       rating: 4.4,
       reviewCount: 276,
     },
   ];
+
+  getCategories(): string[] {
+    const categories = new Set(this.products.map((p) => p.category));
+    return Array.from(categories).sort();
+  }
+
+  getProductById(id: string): Product | undefined {
+    return this.products.find((p) => p.id === id);
+  }
 
   getProducts(filter?: ProductFilter, page = 1, pageSize = 10) {
     let filteredProducts = [...this.products];
@@ -206,19 +215,10 @@ export class ProductsService {
 
     return {
       items,
-      total,
       page,
       pageSize,
+      total,
       totalPages,
     };
-  }
-
-  getProductById(id: string): Product | undefined {
-    return this.products.find((p) => p.id === id);
-  }
-
-  getCategories(): string[] {
-    const categories = new Set(this.products.map((p) => p.category));
-    return Array.from(categories).sort();
   }
 }

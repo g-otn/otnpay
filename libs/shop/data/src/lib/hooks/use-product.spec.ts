@@ -1,18 +1,19 @@
 import { renderHook, waitFor } from '@testing-library/react';
-import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
 import { useProduct } from './use-product';
 
 // Mock fetch
 global.fetch = vi.fn();
 
 const mockProduct = {
-  id: '1',
-  name: 'Wireless Bluetooth Headphones',
-  description: 'Premium wireless headphones with active noise cancellation',
-  price: 99.99,
   category: 'Electronics',
+  description: 'Premium wireless headphones with active noise cancellation',
+  id: '1',
   imageUrl: 'https://via.placeholder.com/600x400',
   inStock: true,
+  name: 'Wireless Bluetooth Headphones',
+  price: 99.99,
   rating: 4.5,
   reviewCount: 120,
 };
@@ -28,8 +29,8 @@ describe('useProduct', () => {
 
   it('should fetch product by id', async () => {
     (fetch as any).mockResolvedValueOnce({
+      json: async () => ({ data: mockProduct, success: true }),
       ok: true,
-      json: async () => ({ success: true, data: mockProduct }),
     });
 
     const { result } = renderHook(() => useProduct('1'));
@@ -62,8 +63,8 @@ describe('useProduct', () => {
 
   it('should handle 404 response', async () => {
     (fetch as any).mockResolvedValueOnce({
+      json: async () => ({ error: 'Product not found', success: false }),
       ok: true,
-      json: async () => ({ success: false, error: 'Product not found' }),
     });
 
     const { result } = renderHook(() => useProduct('invalid-id'));
@@ -82,15 +83,15 @@ describe('useProduct', () => {
 
     (fetch as any)
       .mockResolvedValueOnce({
+        json: async () => ({ data: product1, success: true }),
         ok: true,
-        json: async () => ({ success: true, data: product1 }),
       })
       .mockResolvedValueOnce({
+        json: async () => ({ data: product2, success: true }),
         ok: true,
-        json: async () => ({ success: true, data: product2 }),
       });
 
-    const { result, rerender } = renderHook(({ id }) => useProduct(id), {
+    const { rerender, result } = renderHook(({ id }) => useProduct(id), {
       initialProps: { id: '1' },
     });
 
@@ -110,7 +111,9 @@ describe('useProduct', () => {
     });
 
     expect(fetch).toHaveBeenCalledTimes(2);
-    expect(fetch).toHaveBeenLastCalledWith('http://localhost:3333/api/products/2');
+    expect(fetch).toHaveBeenLastCalledWith(
+      'http://localhost:3333/api/products/2'
+    );
   });
 
   it('should not fetch if id is not provided', () => {
@@ -142,8 +145,8 @@ describe('useProduct', () => {
 
   it('should handle successful response with empty product', async () => {
     (fetch as any).mockResolvedValueOnce({
+      json: async () => ({ data: null, success: true }),
       ok: true,
-      json: async () => ({ success: true, data: null }),
     });
 
     const { result } = renderHook(() => useProduct('1'));

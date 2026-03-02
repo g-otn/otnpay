@@ -18,12 +18,12 @@ export const transactionTypeEnum = pgEnum('transaction_type', [
 export const account = pgTable(
   'accounts',
   {
-    id: serial('id').primaryKey(),
     account_id: integer('account_id').unique(),
     balance: numeric('balance', { precision: 18, scale: 2 })
       .notNull()
       .default('0.00'),
     created_at: timestamp('created_at').defaultNow().notNull(),
+    id: serial('id').primaryKey(),
     updated_at: timestamp('updated_at').defaultNow().notNull(),
   },
   (t) => [
@@ -35,13 +35,13 @@ export const account = pgTable(
 export const transaction = pgTable(
   'transactions',
   {
-    id: serial('id').primaryKey(),
     account_id: integer('account_id')
       .notNull()
       .references(() => account.account_id),
-    type: transactionTypeEnum('type').notNull(),
     amount: numeric('amount', { precision: 18, scale: 2 }).notNull(),
+    id: serial('id').primaryKey(),
     timestamp: timestamp('timestamp').defaultNow().notNull(),
+    type: transactionTypeEnum('type').notNull(),
   },
   (t) => [
     index('transactions_account_id_idx').on(t.account_id),

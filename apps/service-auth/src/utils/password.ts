@@ -16,13 +16,13 @@ export async function hashPassword(
   );
   const key = await crypto.subtle.deriveKey(
     {
+      hash: 'SHA-256',
+      iterations: 100000, // maximum value allowed by crypto.subtle on Cloudflare
       name: 'PBKDF2',
       salt: salt,
-      iterations: 100000, // maximum value allowed by crypto.subtle on Cloudflare
-      hash: 'SHA-256',
     },
     keyMaterial,
-    { name: 'AES-GCM', length: 256 },
+    { length: 256, name: 'AES-GCM' },
     true,
     ['encrypt', 'decrypt']
   );

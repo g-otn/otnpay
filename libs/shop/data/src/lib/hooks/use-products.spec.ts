@@ -1,43 +1,44 @@
-import { renderHook, waitFor } from '@testing-library/react';
-import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { useProducts } from './use-products';
 import { ProductFilter } from '@otnpay/models';
+import { renderHook, waitFor } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { useProducts } from './use-products';
 
 // Mock fetch
 global.fetch = vi.fn();
 
 const mockProductsResponse = {
-  success: true,
   data: {
     items: [
       {
-        id: '1',
-        name: 'Product 1',
-        description: 'Description 1',
-        price: 99.99,
         category: 'Electronics',
+        description: 'Description 1',
+        id: '1',
         imageUrl: 'https://via.placeholder.com/300',
         inStock: true,
+        name: 'Product 1',
+        price: 99.99,
         rating: 4.5,
         reviewCount: 10,
       },
       {
-        id: '2',
-        name: 'Product 2',
-        description: 'Description 2',
-        price: 149.99,
         category: 'Electronics',
+        description: 'Description 2',
+        id: '2',
         imageUrl: 'https://via.placeholder.com/300',
         inStock: false,
+        name: 'Product 2',
+        price: 149.99,
         rating: 4.0,
         reviewCount: 5,
       },
     ],
-    total: 2,
     page: 1,
     pageSize: 10,
+    total: 2,
     totalPages: 1,
   },
+  success: true,
 };
 
 describe('useProducts', () => {
@@ -51,8 +52,8 @@ describe('useProducts', () => {
 
   it('should fetch products without filters', async () => {
     (fetch as any).mockResolvedValueOnce({
-      ok: true,
       json: async () => mockProductsResponse,
+      ok: true,
     });
 
     const { result } = renderHook(() => useProducts());
@@ -76,16 +77,16 @@ describe('useProducts', () => {
 
   it('should fetch products with filters', async () => {
     (fetch as any).mockResolvedValueOnce({
-      ok: true,
       json: async () => mockProductsResponse,
+      ok: true,
     });
 
     const filter = {
-      searchTerm: 'wireless',
       category: 'Electronics',
       inStock: true,
-      minPrice: 50,
       maxPrice: 200,
+      minPrice: 50,
+      searchTerm: 'wireless',
     };
 
     const { result } = renderHook(() => useProducts(filter, 2, 20));
@@ -108,14 +109,14 @@ describe('useProducts', () => {
 
   it('should handle empty filter values correctly', async () => {
     (fetch as any).mockResolvedValueOnce({
-      ok: true,
       json: async () => mockProductsResponse,
+      ok: true,
     });
 
     const filter = {
-      searchTerm: '',
       category: '',
       inStock: undefined,
+      searchTerm: '',
     };
 
     const { result } = renderHook(() => useProducts(filter));
@@ -147,8 +148,8 @@ describe('useProducts', () => {
 
   it('should handle non-ok response', async () => {
     (fetch as any).mockResolvedValueOnce({
+      json: async () => ({ error: 'Failed to load products', success: false }),
       ok: true,
-      json: async () => ({ success: false, error: 'Failed to load products' }),
     });
 
     const { result } = renderHook(() => useProducts());
@@ -163,11 +164,11 @@ describe('useProducts', () => {
 
   it('should refetch when filter changes', async () => {
     (fetch as any).mockResolvedValue({
-      ok: true,
       json: async () => mockProductsResponse,
+      ok: true,
     });
 
-    const { result, rerender } = renderHook(
+    const { rerender, result } = renderHook(
       ({ filter }) => useProducts(filter),
       {
         initialProps: { filter: undefined } as { filter?: ProductFilter },
@@ -196,11 +197,11 @@ describe('useProducts', () => {
 
   it('should refetch when pagination changes', async () => {
     (fetch as any).mockResolvedValue({
-      ok: true,
       json: async () => mockProductsResponse,
+      ok: true,
     });
 
-    const { result, rerender } = renderHook(
+    const { rerender, result } = renderHook(
       ({ page, pageSize }) => useProducts(undefined, page, pageSize),
       {
         initialProps: { page: 1, pageSize: 12 },

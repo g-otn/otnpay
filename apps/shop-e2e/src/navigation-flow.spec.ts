@@ -1,7 +1,9 @@
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
 test.describe('Navigation Flow', () => {
-  test('should complete full user journey from listing to detail and back', async ({ page }) => {
+  test('should complete full user journey from listing to detail and back', async ({
+    page,
+  }) => {
     // Start at home page
     await page.goto('/');
 

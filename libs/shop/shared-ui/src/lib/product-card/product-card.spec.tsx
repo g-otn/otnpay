@@ -1,7 +1,8 @@
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
-import { ProductCard } from './product-card';
 import { createMockProduct } from '@otnpay/shared-test-utils';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
+
+import { ProductCard } from './product-card';
 
 describe('ProductCard', () => {
   const mockProduct = createMockProduct();
@@ -12,7 +13,7 @@ describe('ProductCard', () => {
   });
 
   it('should render product information', () => {
-    render(<ProductCard product={mockProduct} onProductClick={mockOnClick} />);
+    render(<ProductCard onProductClick={mockOnClick} product={mockProduct} />);
 
     expect(screen.getByText('Test Product')).toBeInTheDocument();
     expect(screen.getByText('Electronics')).toBeInTheDocument();
@@ -21,7 +22,7 @@ describe('ProductCard', () => {
   });
 
   it('should display product image', () => {
-    render(<ProductCard product={mockProduct} onProductClick={mockOnClick} />);
+    render(<ProductCard onProductClick={mockOnClick} product={mockProduct} />);
 
     const image = screen.getByAltText('Test Product');
     expect(image).toBeInTheDocument();
@@ -29,7 +30,7 @@ describe('ProductCard', () => {
   });
 
   it('should show rating stars', () => {
-    render(<ProductCard product={mockProduct} onProductClick={mockOnClick} />);
+    render(<ProductCard onProductClick={mockOnClick} product={mockProduct} />);
 
     const stars = screen.getAllByText('★');
     expect(stars).toHaveLength(5);
@@ -41,7 +42,7 @@ describe('ProductCard', () => {
   });
 
   it('should call onProductClick when card is clicked', () => {
-    render(<ProductCard product={mockProduct} onProductClick={mockOnClick} />);
+    render(<ProductCard onProductClick={mockOnClick} product={mockProduct} />);
 
     const card = screen.getByRole('button', {
       name: /View details for Test Product/i,
@@ -53,7 +54,7 @@ describe('ProductCard', () => {
   });
 
   it('should call onProductClick when Enter key is pressed', () => {
-    render(<ProductCard product={mockProduct} onProductClick={mockOnClick} />);
+    render(<ProductCard onProductClick={mockOnClick} product={mockProduct} />);
 
     const card = screen.getByRole('button', {
       name: /View details for Test Product/i,
@@ -64,7 +65,7 @@ describe('ProductCard', () => {
   });
 
   it('should call onProductClick when Space key is pressed', () => {
-    render(<ProductCard product={mockProduct} onProductClick={mockOnClick} />);
+    render(<ProductCard onProductClick={mockOnClick} product={mockProduct} />);
 
     const card = screen.getByRole('button', {
       name: /View details for Test Product/i,
@@ -77,7 +78,7 @@ describe('ProductCard', () => {
   it('should show out of stock overlay when product is not in stock', () => {
     const outOfStockProduct = createMockProduct({ inStock: false });
     render(
-      <ProductCard product={outOfStockProduct} onProductClick={mockOnClick} />
+      <ProductCard onProductClick={mockOnClick} product={outOfStockProduct} />
     );
 
     expect(screen.getByText('Out of Stock')).toBeInTheDocument();
@@ -87,7 +88,7 @@ describe('ProductCard', () => {
   });
 
   it('should have proper accessibility attributes', () => {
-    render(<ProductCard product={mockProduct} onProductClick={mockOnClick} />);
+    render(<ProductCard onProductClick={mockOnClick} product={mockProduct} />);
 
     const card = screen.getByRole('button');
     expect(card).toHaveAttribute('tabIndex', '0');
