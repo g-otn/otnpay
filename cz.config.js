@@ -1,4 +1,18 @@
 const { definePrompt } = require('czg');
+const { readdirSync } = require('fs');
+const { join } = require('path');
+
+function getSubfolders(dir) {
+  try {
+    return readdirSync(join(__dirname, dir), { withFileTypes: true })
+      .filter((d) => d.isDirectory())
+      .map((d) => d.name);
+  } catch {
+    return [];
+  }
+}
+
+const scopes = [...getSubfolders('apps'), ...getSubfolders('libs')];
 
 module.exports = definePrompt({
   useEmoji: true,
@@ -52,8 +66,9 @@ module.exports = definePrompt({
       emoji: '⏪️',
     },
   ],
-  scopes: [],
+  scopes,
   allowCustomScopes: true,
   allowEmptyScopes: true,
-  skipQuestions: ['footer'],
+  skipQuestions: ['footer', 'footerPrefix'],
+  maxHeaderLength: 65,
 });
