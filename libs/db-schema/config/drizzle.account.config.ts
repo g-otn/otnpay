@@ -9,5 +9,6 @@ export default defineConfig({
     : {}),
   dialect: 'postgresql',
   out: './migrations/account',
-  schema: './src/account/schema.ts',
+  schema:
+    '../../apps/account-service/src/account/adapters/persistence/schema.ts',
 });

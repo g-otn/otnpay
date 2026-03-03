@@ -6,9 +6,6 @@ import * as schema from './schema';
 export function getDB(connectionString: string, applicationName?: string) {
   const client = postgres(connectionString, {
     connection: { application_name: applicationName },
-    // For the auth schema, we don't have any complex or custom types,
-    // so we can save a TCP round trip by disabling this
-    fetch_types: false,
     max: 1,
   });
   return drizzle(client, { schema });

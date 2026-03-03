@@ -18,16 +18,16 @@ export const transactionTypeEnum = pgEnum('transaction_type', [
 export const account = pgTable(
   'accounts',
   {
-    account_id: integer('account_id').unique(),
-    balance: numeric('balance', { precision: 18, scale: 2 })
+    balance: numeric('balance', { precision: 13, scale: 2 })
       .notNull()
       .default('0.00'),
     created_at: timestamp('created_at').defaultNow().notNull(),
     id: serial('id').primaryKey(),
     updated_at: timestamp('updated_at').defaultNow().notNull(),
+    user_id: integer('user_id').unique(),
   },
   (t) => [
-    index('accounts_account_id_idx').on(t.account_id),
+    index('accounts_user_id_idx').on(t.user_id),
     check('accounts_balance_non_negative', sql`${t.balance} >= 0`),
   ]
 );
@@ -35,16 +35,16 @@ export const account = pgTable(
 export const transaction = pgTable(
   'transactions',
   {
-    account_id: integer('account_id')
-      .notNull()
-      .references(() => account.account_id),
-    amount: numeric('amount', { precision: 18, scale: 2 }).notNull(),
+    amount: numeric('amount', { precision: 13, scale: 2 }).notNull(),
     id: serial('id').primaryKey(),
     timestamp: timestamp('timestamp').defaultNow().notNull(),
     type: transactionTypeEnum('type').notNull(),
+    user_id: integer('user_id')
+      .notNull()
+      .references(() => account.user_id),
   },
   (t) => [
-    index('transactions_account_id_idx').on(t.account_id),
+    index('transactions_user_id_idx').on(t.user_id),
     index('transactions_type_idx').on(t.type),
     index('transactions_timestamp_idx').on(t.timestamp),
   ]
