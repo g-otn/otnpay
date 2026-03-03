@@ -1,3 +1,4 @@
+import { passwordSchema } from '@otnpay/schemas';
 import { timed } from '@otnpay/utils';
 import { contentJson, OpenAPIRoute } from 'chanfana';
 import { Context } from 'hono';
@@ -10,7 +11,6 @@ import { EmailAlreadyTakenError } from '~/auth/domain/errors';
 import { AppEnv } from '~/types';
 import { RouteTag } from '~/utils';
 import { badRequestResponse, ErrorSchema } from '~/utils/oas';
-import { passwordSchema } from '~/utils/schemas';
 
 export class AuthSignup extends OpenAPIRoute {
   schema = {

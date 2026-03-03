@@ -1,3 +1,4 @@
+import { passwordSchema } from '@otnpay/schemas';
 import { timed } from '@otnpay/utils';
 import { contentJson, OpenAPIRoute } from 'chanfana';
 import { Context } from 'hono';
@@ -12,7 +13,6 @@ import { InvalidCredentialsError } from '~/auth/domain/errors';
 import { AppEnv } from '~/types';
 import { RouteTag } from '~/utils';
 import { badRequestResponse, unauthorizedResponse } from '~/utils/oas';
-import { passwordSchema } from '~/utils/schemas';
 
 export class AuthLogin extends OpenAPIRoute {
   schema = {
