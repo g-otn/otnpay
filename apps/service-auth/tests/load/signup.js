@@ -12,7 +12,7 @@ export default function () {
     JSON.stringify(
       {
         email: `loadtest.${Date.now()}.${__VU}@test.com`,
-        owner_name: 'Full Name',
+        ownerName: 'Full Name',
         password: 'asfi32!aegfimswAesgdfkj',
       },
       {

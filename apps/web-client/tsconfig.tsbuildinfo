@@ -1,0 +1,1 @@
+{"root":["./vite.config.ts","./worker-configuration.d.ts","./src/routetree.gen.ts","./src/router.tsx","./src/components/header.tsx","./src/routes/__root.tsx","./src/routes/index.tsx"],"errors":true,"version":"5.9.3"}
