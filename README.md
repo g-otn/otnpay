@@ -69,22 +69,125 @@ k6 run spike.js
 
 ## Endpoint examples
 
-I recommend accessing the "Scalar API reference" hosted by the services:
+### Scalar API Registry
+
+Please access the **"Scalar API Reference"**, the web interface for API documentation hosted by the services:
 
 - Auth: https://otnpay-auth-service.g0tn.workers.dev/scalar
 - Balance: https://otnpay-account-service.g0tn.workers.dev/scalar
 
-It is easier to use, especially for authenticated endpoints.
+There you will find documented request/response bodies, status codes and generated examples.
 
 ### Auth
 
+<details>
+  <summary>cURL snippets</summary>
+
+Register a new user
+
+```bash
+curl https://otnpay-auth-service.g0tn.workers.dev/auth/signup \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "email": "",
+  "ownerName": "",
+  "password": ""
+}'
+```
+
+Login with email and password
+
+```bash
+curl https://otnpay-auth-service.g0tn.workers.dev/auth/login \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "email": "",
+  "password": ""
+}'
+```
+
+Logout
+
+```bash
+curl https://otnpay-auth-service.g0tn.workers.dev/auth/logout \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "refreshToken": ""
+}'
+```
+
+Exchange refresh token for new token pair
+
+```bash
+curl https://otnpay-auth-service.g0tn.workers.dev/auth/refresh \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "refreshToken": ""
+}'
+```
+
+Health check
+
+```bash
+curl https://otnpay-auth-service.g0tn.workers.dev/health
+```
+
+</details>
+
 ### Account
+
+<details>
+  <summary>cURL snippets</summary>
+
+Deposit funds into account
+
+```bash
+curl http://localhost:9510/accounts/deposit \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer YOUR_SECRET_TOKEN' \
+  --data '{
+  "amount": ""
+}'
+```
+
+Withdraw funds from account
+
+```bash
+curl http://localhost:9510/accounts/withdraw \
+  --request POST \
+  --header 'Content-Type: application/json' \
+  --header 'Authorization: Bearer YOUR_SECRET_TOKEN' \
+  --data '{
+  "amount": ""
+}'
+```
+
+Get account balance
+
+```bash
+curl http://localhost:9510/accounts/balance \
+  --header 'Authorization: Bearer YOUR_SECRET_TOKEN'
+```
+
+Health check
+
+```bash
+curl http://localhost:9510/health
+```
+
+</details>
 
 ## Architecture
 
 ![Architecture diagram](https://iili.io/qB0PP1I.png)
 
 - This is optimized for a single region (not global)
+- Microsservices implement hexagonal (ports and adapters) architecture
 - We're using a BFF Token Handler pattern:
   - Backend For Frontend (BFF) exists so tokens can be stored securely.
     - Tokens will be saved on Redis

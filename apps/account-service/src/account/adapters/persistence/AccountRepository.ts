@@ -15,6 +15,7 @@ export class AccountRepository implements IAccountRepository {
     const isDebit = delta.startsWith('-');
     const absAmount = isDebit ? delta.slice(1) : delta;
 
+    // TODO: Idempotency key, select for update
     return await this.db.transaction(async (tx) => {
       const [result] = await tx
         .update(account)
