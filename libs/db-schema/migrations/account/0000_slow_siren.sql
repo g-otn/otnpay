@@ -1,20 +1,20 @@
 CREATE TYPE "public"."transaction_type" AS ENUM('deposit', 'withdrawal');--> statement-breakpoint
 CREATE TABLE "accounts" (
-	"user_id" integer,
-	"balance" numeric(18, 2) DEFAULT '0.00' NOT NULL,
+	"balance" numeric(13, 2) DEFAULT '0.00' NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"id" serial PRIMARY KEY NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL,
+	"user_id" integer,
 	CONSTRAINT "accounts_user_id_unique" UNIQUE("user_id"),
 	CONSTRAINT "accounts_balance_non_negative" CHECK ("accounts"."balance" >= 0)
 );
 --> statement-breakpoint
 CREATE TABLE "transactions" (
-	"user_id" integer NOT NULL,
-	"amount" numeric(18, 2) NOT NULL,
+	"amount" numeric(13, 2) NOT NULL,
 	"id" serial PRIMARY KEY NOT NULL,
 	"timestamp" timestamp DEFAULT now() NOT NULL,
-	"type" "transaction_type" NOT NULL
+	"type" "transaction_type" NOT NULL,
+	"user_id" integer NOT NULL
 );
 --> statement-breakpoint
 ALTER TABLE "transactions" ADD CONSTRAINT "transactions_user_id_accounts_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."accounts"("user_id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint

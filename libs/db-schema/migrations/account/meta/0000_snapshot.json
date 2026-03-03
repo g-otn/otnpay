@@ -1,5 +1,5 @@
 {
-  "id": "b2ffd577-271c-4f71-aa9c-c904c84e5066",
+  "id": "0d78657e-7b50-4509-b64a-b3ba0da1d7b3",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -8,15 +8,9 @@
       "name": "accounts",
       "schema": "",
       "columns": {
-        "user_id": {
-          "name": "user_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
         "balance": {
           "name": "balance",
-          "type": "numeric(18, 2)",
+          "type": "numeric(13, 2)",
           "primaryKey": false,
           "notNull": true,
           "default": "'0.00'"
@@ -40,6 +34,12 @@
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {
@@ -81,15 +81,9 @@
       "name": "transactions",
       "schema": "",
       "columns": {
-        "user_id": {
-          "name": "user_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
         "amount": {
           "name": "amount",
-          "type": "numeric(18, 2)",
+          "type": "numeric(13, 2)",
           "primaryKey": false,
           "notNull": true
         },
@@ -110,6 +104,12 @@
           "name": "type",
           "type": "transaction_type",
           "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "integer",
           "primaryKey": false,
           "notNull": true
         }
