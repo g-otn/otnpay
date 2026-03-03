@@ -30,6 +30,16 @@ x-pgdog: &pgdog
         memory: 128m
         cpus: '0.25'
 
+# We're using nginx as a load balancer to simulate serveless concurrency
+x-nginx: &nginx
+  image: nginx:alpine
+  restart: unless-stopped
+  deploy:
+    resources:
+      limits:
+        memory: 64m
+        cpus: '0.1'
+
 x-worker: &worker
   build:
     context: .
@@ -41,8 +51,7 @@ x-worker: &worker
   deploy:
     resources:
       limits:
-        # 256MiB for wrangler dev mode (not prod) + 128MiB worker memory limit
-        memory: 384m
+        memory: 256m # Deployed worker memory limit is 128m, but wrangler dev has overhead
         cpus: '0.5'
 
 x-users-toml: &users-toml |
@@ -137,12 +146,10 @@ services:
           memory: 64m
           cpus: '0.1'
 
-  auth-service:
+  auth-service-1: &auth-service
     <<: *worker
-    container_name: auth-service
+    container_name: auth-service-1
     profiles: [auth]
-    ports:
-      - '9010:9010'
     environment:
       AUTH_SERVICE_REDIS_URL: 'http://auth-redis-proxy'
       AUTH_SERVICE_REDIS_TOKEN: 'dev_auth_redis_proxy_token'
@@ -153,6 +160,25 @@ services:
         condition: service_started
       auth-redis-proxy:
         condition: service_started
+    networks:
+      - auth-network
+
+  auth-service-2:
+    <<: *auth-service
+    container_name: auth-service-2
+
+  auth-lb:
+    <<: *nginx
+    container_name: auth-lb
+    profiles: [auth]
+    ports:
+      - '9010:80'
+    configs:
+      - source: auth_nginx_conf
+        target: /etc/nginx/conf.d/default.conf
+    depends_on:
+      - auth-service-1
+      - auth-service-2
     networks:
       - auth-network
 
@@ -264,6 +290,19 @@ configs:
       password = "dev_password"
       host = "account-db"
       port = 5432
+
+  auth_nginx_conf:
+    content: |
+      upstream auth {
+        server auth-service-1:9010;
+        server auth-service-2:9010;
+      }
+      server {
+        listen 80;
+        location / {
+          proxy_pass http://auth;
+        }
+      }
 
   users_auth_toml:
     content: *users-toml
