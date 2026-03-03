@@ -1,262 +1,96 @@
-# Nx React Repository
+# otnpay
 
-<a alt="Nx logo" href="https://nx.dev" target="_blank" rel="noreferrer"><img src="https://raw.githubusercontent.com/nrwl/nx/master/images/nx-logo.png" width="45"></a>
+A simple bank account system which allows account creation, user authentication and
+balance deposit and withdraws.
 
-✨ A repository showcasing key [Nx](https://nx.dev) features for React monorepos ✨
+This repo contains the Nx monorepo with all the packages needed to run the whole platform.
 
-🚀 If you haven't connected to Nx Cloud yet, [complete your setup here](https://cloud.nx.app/setup/connect-workspace/guide). Get faster builds with remote caching, distributed task execution, and self-healing CI. [See how your workspace can benefit](#nx-cloud).
+## Objective
 
-## 📦 Project Overview
+This was made for learning purposes and to deepen technical knowledge.
+For example to test the tradeoffs of using a serveless microsservice architecture, and for manual implementation of some concepts such as BFF Token Bearer.
 
-This repository demonstrates a production-ready React monorepo with:
+## Running (via Docker compose)
 
-- **2 Applications**
-
-  - `shop` - React e-commerce application with product listings and detail views
-  - `api` - Backend API serving product data
-
-- **7 Libraries**
-
-  - `@otnpay/shop-feature-products` - Product listing feature (React)
-  - `@otnpay/shop-feature-product-detail` - Product detail feature (React)
-  - `@otnpay/shop-data` - Data access layer for shop features
-  - `@otnpay/shop-shared-ui` - Shared UI components
-  - `@otnpay/models` - Shared data models
-  - `@otnpay/api-products` - API product service library
-  - `@otnpay/shared-test-utils` - Shared testing utilities
-
-- **E2E Testing**
-  - `shop-e2e` - Playwright tests for the shop application
-
-## 🚀 Quick Start
+1. Clone the repository:
 
 ```bash
-# Clone the repository
-git clone <your-fork-url>
-cd <your-repository-name>
-
-# Install dependencies
-bun install
-
-# Serve the React shop application (this will simultaneously serve the API backend)
-bunx nx serve shop
-
-# ...or you can serve the API separately
-bunx nx serve api
-
-# Build all projects
-bunx nx run-many -t build
-
-# Run tests
-bunx nx run-many -t test
-
-# Lint all projects
-bunx nx run-many -t lint
-
-# Run e2e tests
-bunx nx e2e shop-e2e
-
-# Run tasks in parallel
-
-bunx nx run-many -t lint test build e2e --parallel=3
-
-# Visualize the project graph
-bunx nx graph
+git clone https://github.com/g-otn/otnpay.git
+cd otnpay
 ```
 
-## ⭐ Featured Nx Capabilities
+2. Start docker compose
 
-This repository showcases several powerful Nx features:
+```
+docker compose up
+```
 
-### 1. 🔒 Module Boundaries
+This will also build a image of the workspace locally,
+used by the worker services.
 
-Enforces architectural constraints using tags. Each project has specific dependencies it can use:
+3. After startup, for now, you can access the API docs for each microsservice:
+   - Auth: http://localhost:9010
+   - Account: http://localhost:9510
 
-- `scope:shared` - Can be used by all projects
-- `scope:shop` - Shop-specific libraries
-- `scope:api` - API-specific libraries
-- `type:feature` - Feature libraries
-- `type:data` - Data access libraries
-- `type:ui` - UI component libraries
+## Running tests
 
-**Try it out:**
+### Unit tests
+
+TODO
+
+### Integration tests
+
+TODO
+
+### End-to-end tests
+
+TODO
+
+### Load tests
+
+1. Make sure the application is running using the docker compose setup
+
+2. Choose a service and navigate to the load tests folder:
 
 ```bash
-# See the current project graph and boundaries
-bunx nx graph
-
-# View a specific project's details
-bunx nx show project shop --web
+cd apps/service-auth/tests/load
+# or
+cd apps/account-service/tests/load
 ```
 
-[Learn more about module boundaries →](https://nx.dev/features/enforce-module-boundaries)
-
-### 2. 🎭 Playwright E2E Testing
-
-End-to-end testing with Playwright is pre-configured:
+3. Choose and execute a load test type:
 
 ```bash
-# Run e2e tests
-bunx nx e2e shop-e2e
-
-# Run e2e tests in CI mode
-bunx nx e2e-ci shop-e2e
+k6 run smoke.js
+k6 run load.js
+k6 run stress.js
+k6 run spike.js
 ```
 
-[Learn more about E2E testing →](https://nx.dev/technologies/test-tools/playwright/introduction#e2e-testing)
+## Endpoint examples
 
-### 3. ⚡ Vitest for Unit Testing
+I recommend accessing the "Scalar API reference" hosted by the services:
 
-Fast unit testing with Vitest for React libraries:
+- Auth: https://otnpay-auth-service.g0tn.workers.dev/scalar
+- Balance: https://otnpay-account-service.g0tn.workers.dev/scalar
 
-```bash
-# Test a specific library
-bunx nx test shop-data
+It is easier to use, especially for authenticated endpoints.
 
-# Test all projects
-bunx nx run-many -t test
-```
+### Auth
 
-[Learn more about Vite testing →](https://nx.dev/recipes/vite)
+### Account
 
-### 4. 🔧 Self-Healing CI
+## Architecture
 
-The CI pipeline includes `nx fix-ci` which automatically identifies and suggests fixes for common issues:
+![Architecture diagram](https://iili.io/qB0PP1I.png)
 
-```bash
-# In CI, this command provides automated fixes
-bunx nx fix-ci
-```
-
-This feature helps maintain a healthy CI pipeline by automatically detecting and suggesting solutions for:
-
-- Missing dependencies
-- Incorrect task configurations
-- Cache invalidation issues
-- Common build failures
-
-[Learn more about self-healing CI →](https://nx.dev/ci/features/self-healing-ci)
-
-## 📁 Project Structure
-
-```
-├── apps/
-│   ├── shop/           [scope:shop]    - React e-commerce app
-│   ├── shop-e2e/                       - E2E tests for shop
-│   └── api/            [scope:api]     - Backend API
-├── libs/
-│   ├── shop/
-│   │   ├── feature-products/        [scope:shop,type:feature] - Product listing
-│   │   ├── feature-product-detail/  [scope:shop,type:feature] - Product details
-│   │   ├── data/                    [scope:shop,type:data]    - Data access
-│   │   └── shared-ui/               [scope:shop,type:ui]      - UI components
-│   ├── api/
-│   │   └── products/    [scope:api]    - Product service
-│   └── shared/
-│       ├── models/      [scope:shared,type:data] - Shared models
-│       └── test-utils/  [scope:shared]           - Testing utilities
-├── nx.json             - Nx configuration
-├── tsconfig.json       - TypeScript configuration
-└── eslint.config.mjs   - ESLint with module boundary rules
-```
-
-## 🏷️ Understanding Tags
-
-This repository uses tags to enforce module boundaries:
-
-| Project                 | Tags                         | Can Import From              |
-| ----------------------- | ---------------------------- | ---------------------------- |
-| `shop`                  | `scope:shop`                 | `scope:shop`, `scope:shared` |
-| `api`                   | `scope:api`                  | `scope:api`, `scope:shared`  |
-| `shop-feature-products` | `scope:shop`, `type:feature` | `scope:shop`, `scope:shared` |
-| `shop-data`             | `scope:shop`, `type:data`    | `scope:shared`               |
-| `models`                | `scope:shared`, `type:data`  | Nothing (base library)       |
-
-## 📚 Useful Commands
-
-```bash
-# Project exploration
-bunx nx graph                                    # Interactive dependency graph
-bunx nx list                                     # List installed plugins
-bunx nx show project shop --web                 # View project details
-
-# Development
-bunx nx serve shop                              # Serve React app
-bunx nx serve api                               # Serve backend API
-bunx nx build shop                              # Build React app
-bunx nx test shop-data                          # Test a specific library
-bunx nx lint shop-feature-products              # Lint a specific library
-
-# Running multiple tasks
-bunx nx run-many -t build                       # Build all projects
-bunx nx run-many -t test --parallel=3          # Test in parallel
-bunx nx run-many -t lint test build            # Run multiple targets
-
-# Affected commands (great for CI)
-bunx nx affected -t build                       # Build only affected projects
-bunx nx affected -t test                        # Test only affected projects
-```
-
-## 🎯 Adding New Features
-
-### Generate a new React application:
-
-```bash
-bunx nx g @nx/react:app my-app
-```
-
-### Generate a new React library:
-
-```bash
-bunx nx g @nx/react:lib my-lib
-```
-
-### Generate a new React component:
-
-```bash
-bunx nx g @nx/react:component my-component --project=my-lib
-```
-
-### Generate a new API library:
-
-```bash
-bunx nx g @nx/node:lib my-api-lib
-```
-
-You can use `bunx nx list` to see all available plugins and `bunx nx list <plugin-name>` to see all generators for a specific plugin.
-
-## Nx Cloud
-
-Nx Cloud ensures a [fast and scalable CI](https://nx.dev/ci/intro/why-nx-cloud?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects) pipeline. It includes features such as:
-
-- [Remote caching](https://nx.dev/ci/features/remote-cache?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task distribution across multiple machines](https://nx.dev/ci/features/distribute-task-execution?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Automated e2e test splitting](https://nx.dev/ci/features/split-e2e-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-- [Task flakiness detection and rerunning](https://nx.dev/ci/features/flaky-tasks?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## Install Nx Console
-
-Nx Console is an editor extension that enriches your developer experience. It lets you run tasks, generate code, and improves code autocompletion in your IDE. It is available for VSCode and IntelliJ.
-
-[Install Nx Console &raquo;](https://nx.dev/getting-started/editor-setup?utm_source=nx_project&utm_medium=readme&utm_campaign=nx_projects)
-
-## 🔗 Learn More
-
-- [Nx Documentation](https://nx.dev)
-- [React Monorepo Tutorial](https://nx.dev/getting-started/tutorials/react-monorepo-tutorial)
-- [Module Boundaries](https://nx.dev/features/enforce-module-boundaries)
-- [Docker Integration](https://nx.dev/recipes/nx-release/release-docker-images)
-- [Playwright Testing](https://nx.dev/technologies/test-tools/playwright/introduction#e2e-testing)
-- [Vite with React](https://nx.dev/recipes/vite)
-- [Nx Cloud](https://nx.dev/ci/intro/why-nx-cloud)
-- [Releasing Packages](https://nx.dev/features/manage-releases)
-
-## 💬 Community
-
-Join the Nx community:
-
-- [Discord](https://go.nx.dev/community)
-- [X (Twitter)](https://twitter.com/nxdevtools)
-- [LinkedIn](https://www.linkedin.com/company/nrwl)
-- [YouTube](https://www.youtube.com/@nxdevtools)
-- [Blog](https://nx.dev/blog)
+- This is optimized for a single region (not global)
+- We're using a BFF Token Handler pattern:
+  - Backend For Frontend (BFF) exists so tokens can be stored securely.
+    - Tokens will be saved on Redis
+    - Similarly, this allows queue messages to be published and consumed without exposing secrets to the client.
+  - Client will only know the BFF and the session cookie, and never interact with the tokens directly.
+- HTTP proxy is required so serveless environments can access an external Redis instance. Upstash provides this already.
+- Postgres connection pooler is there to ease the load on the DB since each request would be a different connection. Supabase provides this already.
+- Account microsservice hashes the transaction payload to avoid repeated transactions and uses database transaction to avoid acting upon stale data.
+- Account microsservice will consume and produce Queue messages
