@@ -2,8 +2,10 @@ import { contentJson, OpenAPIRoute } from 'chanfana';
 import { Context } from 'hono';
 import { z } from 'zod';
 
-import { getRedis } from '~/redis';
-import { RouteTag } from '~/utils/constants';
+import { logout } from '~/auth/application/use-cases/logout';
+import { RouteTag } from '~/utils';
+
+import { getRedis, SessionRepository } from '../persistence';
 
 export class AuthLogout extends OpenAPIRoute {
   schema = {
@@ -27,10 +29,8 @@ export class AuthLogout extends OpenAPIRoute {
     const data = await this.getValidatedData<typeof this.schema>();
     const { refreshToken } = data.body;
 
-    // JWTs are stateless, so we can't revoke them.
-    // However we can revoke the refresh token
-    const redis = getRedis(c.env);
-    await redis.del(`refresh:${refreshToken}`);
+    const sessionRepo = new SessionRepository(getRedis(c.env));
+    await logout({ refreshToken }, sessionRepo);
 
     return c.status(204);
   }

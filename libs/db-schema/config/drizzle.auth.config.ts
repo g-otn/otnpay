@@ -8,5 +8,5 @@ export default defineConfig({
     : {}),
   dialect: 'postgresql',
   out: './migrations/auth',
-  schema: './src/auth/schema.ts',
+  schema: '../../apps/service-auth/src/auth/adapters/persistence/schema.ts',
 });

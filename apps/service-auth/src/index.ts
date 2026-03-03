@@ -9,11 +9,11 @@ import { requestId } from 'hono/request-id';
 import { nanoid } from 'nanoid';
 import pino from 'pino';
 
-import { dbAppName } from '~/middleware/dbAppName';
-import { AuthLogin } from '~/routes/auth/login';
-import { AuthLogout } from '~/routes/auth/logout';
-import { AuthRefresh } from '~/routes/auth/refresh';
-import { AuthSignup } from '~/routes/auth/signup';
+import { AuthLogin } from '~/auth/adapters/controllers/login';
+import { AuthLogout } from '~/auth/adapters/controllers/logout';
+import { AuthRefresh } from '~/auth/adapters/controllers/refresh';
+import { AuthSignup } from '~/auth/adapters/controllers/signup';
+import { appName } from '~/middleware/appName';
 import { HealthCheck } from '~/routes/health';
 import { AppEnv } from '~/types';
 
@@ -33,7 +33,7 @@ app.use(
   })
 );
 app.use(prettyJSON());
-app.use(dbAppName);
+app.use(appName);
 
 app.notFound((c) => c.json({ message: 'Not found', ok: false }, 404));
 app.onError((error, c) => {
@@ -46,18 +46,6 @@ app.onError((error, c) => {
   c.var.logger.error(error, 'Unknown error during request');
   return c.json({ error: 'Internal server error' }, 500);
 });
-
-// app.use('/auth/*', (c, next) => {
-//   if (['/auth/login', '/auth/refresh', '/auth/signup'].includes(c.req.path)) {
-//     return next();
-//   }
-
-//   const jwtMiddleware = jwt({
-//     alg: 'RS256',
-//     secret: c.env.AUTH_SERVICE_JWT_PUBLIC_KEY,
-//   });
-//   return jwtMiddleware(c, next);
-// });
 
 const openapi = fromHono(app, {
   docs_url: null,
