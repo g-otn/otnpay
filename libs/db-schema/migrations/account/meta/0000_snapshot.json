@@ -1,5 +1,5 @@
 {
-  "id": "2d4dc2e6-ee2f-4f12-827a-527a108b6bb5",
+  "id": "b2ffd577-271c-4f71-aa9c-c904c84e5066",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -8,8 +8,8 @@
       "name": "accounts",
       "schema": "",
       "columns": {
-        "account_id": {
-          "name": "account_id",
+        "user_id": {
+          "name": "user_id",
           "type": "integer",
           "primaryKey": false,
           "notNull": false
@@ -43,11 +43,11 @@
         }
       },
       "indexes": {
-        "accounts_account_id_idx": {
-          "name": "accounts_account_id_idx",
+        "accounts_user_id_idx": {
+          "name": "accounts_user_id_idx",
           "columns": [
             {
-              "expression": "account_id",
+              "expression": "user_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -62,10 +62,10 @@
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "accounts_account_id_unique": {
-          "name": "accounts_account_id_unique",
+        "accounts_user_id_unique": {
+          "name": "accounts_user_id_unique",
           "nullsNotDistinct": false,
-          "columns": ["account_id"]
+          "columns": ["user_id"]
         }
       },
       "policies": {},
@@ -81,8 +81,8 @@
       "name": "transactions",
       "schema": "",
       "columns": {
-        "account_id": {
-          "name": "account_id",
+        "user_id": {
+          "name": "user_id",
           "type": "integer",
           "primaryKey": false,
           "notNull": true
@@ -115,11 +115,11 @@
         }
       },
       "indexes": {
-        "transactions_account_id_idx": {
-          "name": "transactions_account_id_idx",
+        "transactions_user_id_idx": {
+          "name": "transactions_user_id_idx",
           "columns": [
             {
-              "expression": "account_id",
+              "expression": "user_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -162,12 +162,12 @@
         }
       },
       "foreignKeys": {
-        "transactions_account_id_accounts_account_id_fk": {
-          "name": "transactions_account_id_accounts_account_id_fk",
+        "transactions_user_id_accounts_user_id_fk": {
+          "name": "transactions_user_id_accounts_user_id_fk",
           "tableFrom": "transactions",
           "tableTo": "accounts",
-          "columnsFrom": ["account_id"],
-          "columnsTo": ["account_id"],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["user_id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
