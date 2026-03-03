@@ -66,15 +66,23 @@ openapi.get('/accounts/balance', AccountGetBalance);
 
 openapi.get('/health', HealthCheck);
 
-app.get(
-  '/scalar',
-  Scalar({
+const accountServers = [
+  { description: 'Local server', url: 'http://localhost:9510' },
+  {
+    description: 'Deployed server',
+    url: 'https://otnpay-account-service.g0tn.workers.dev',
+  },
+];
+
+app.get('/scalar', (c, next) => {
+  const isDev = new URL(c.req.url).hostname === 'localhost';
+  return Scalar<AppEnv>({
     expandAllModelSections: true,
     expandAllResponses: true,
-    servers: [{ description: 'Local server', url: 'http://localhost:9510' }],
+    servers: isDev ? accountServers : [...accountServers].reverse(),
     url: '/doc',
-  })
-);
+  })(c, next);
+});
 
 openapi.registry.registerComponent('securitySchemes', 'bearerAuth', {
   bearerFormat: 'JWT',

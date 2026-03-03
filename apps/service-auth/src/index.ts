@@ -65,21 +65,23 @@ openapi.post('/auth/refresh', AuthRefresh);
 
 openapi.get('/health', HealthCheck);
 
-app.get(
-  '/scalar',
-  Scalar({
+const authServers = [
+  { description: 'Local server', url: 'http://localhost:9010' },
+  {
+    description: 'Deployed server',
+    url: 'https://otnpay-auth-service.g0tn.workers.dev',
+  },
+];
+
+app.get('/scalar', (c) => {
+  const isDev = new URL(c.req.url).hostname === 'localhost';
+  return Scalar({
     expandAllModelSections: true,
     expandAllResponses: true,
-    servers: [
-      { description: 'Local server', url: 'http://localhost:9010' },
-      {
-        description: 'Deployed server',
-        url: 'https://otnpay-auth-service.g0tn.workers.dev',
-      },
-    ],
+    servers: isDev ? authServers : [...authServers].reverse(),
     url: '/doc',
-  })
-);
+  })(c);
+});
 
 openapi.registry.registerComponent('securitySchemes', 'bearerAuth', {
   bearerFormat: 'JWT',
