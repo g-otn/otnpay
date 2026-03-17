@@ -1,5 +1,6 @@
 import { eq, sql } from 'drizzle-orm';
 
+import { InsufficientFundsError } from '~/account/domain/errors';
 import { IAccountRepository } from '~/account/domain/ports';
 
 import { getDB } from './db';
@@ -15,8 +16,23 @@ export class AccountRepository implements IAccountRepository {
     const isDebit = delta.startsWith('-');
     const absAmount = isDebit ? delta.slice(1) : delta;
 
-    // TODO: Idempotency key, select for update
+    // TODO: Idempotency key
     return await this.db.transaction(async (tx) => {
+      await tx
+        .insert(account)
+        .values({ user_id: userId })
+        .onConflictDoNothing({ target: account.user_id });
+
+      const [current] = await tx
+        .select({ balance: account.balance })
+        .from(account)
+        .where(eq(account.user_id, userId))
+        .for('update');
+
+      if (isDebit && parseFloat(current.balance) < parseFloat(absAmount)) {
+        throw new InsufficientFundsError();
+      }
+
       const [result] = await tx
         .update(account)
         .set({
