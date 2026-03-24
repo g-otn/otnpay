@@ -1,6 +1,6 @@
 import { Scalar } from '@scalar/hono-api-reference';
-import { fromHono } from 'chanfana';
 import { Hono } from 'hono';
+import { openAPISpecs } from 'hono-openapi';
 import { pinoLogger } from 'hono-pino';
 import { createHandler as debugLog } from 'hono-pino/debug-log';
 import { HTTPException } from 'hono/http-exception';
@@ -9,12 +9,28 @@ import { requestId } from 'hono/request-id';
 import { nanoid } from 'nanoid';
 import pino from 'pino';
 
-import { AuthLogin } from '~/auth/adapters/controllers/login';
-import { AuthLogout } from '~/auth/adapters/controllers/logout';
-import { AuthRefresh } from '~/auth/adapters/controllers/refresh';
-import { AuthSignup } from '~/auth/adapters/controllers/signup';
+import {
+  AuthLogin,
+  AuthLoginRoute,
+  authLoginValidator,
+} from '~/auth/adapters/controllers/login';
+import {
+  AuthLogout,
+  AuthLogoutRoute,
+  authLogoutValidator,
+} from '~/auth/adapters/controllers/logout';
+import {
+  AuthRefresh,
+  AuthRefreshRoute,
+  authRefreshValidator,
+} from '~/auth/adapters/controllers/refresh';
+import {
+  AuthSignup,
+  AuthSignupRoute,
+  authSignupValidator,
+} from '~/auth/adapters/controllers/signup';
 import { appName } from '~/middleware/appName';
-import { HealthCheck } from '~/routes/health';
+import { HealthCheck, HealthCheckRoute } from '~/routes/health';
 import { AppEnv } from '~/types';
 
 const app = new Hono<AppEnv>();
@@ -37,9 +53,7 @@ app.use(appName);
 
 app.notFound((c) => c.json({ message: 'Not found', ok: false }, 404));
 app.onError((error, c) => {
-  // Chanfana errors arrive as HTTPException with the formatted response attached
   if (error.constructor.name === 'HTTPException') {
-    // Return chanfana's standard error format (e.g validation errors)
     return (error as HTTPException).getResponse();
   }
 
@@ -47,23 +61,12 @@ app.onError((error, c) => {
   return c.json({ error: 'Internal server error' }, 500);
 });
 
-const openapi = fromHono(app, {
-  docs_url: null,
-  openapi_url: '/doc',
-  schema: {
-    info: {
-      title: 'otnpay Auth Service',
-      version: '1.0.0',
-    },
-  },
-});
+app.post('/auth/signup', AuthSignupRoute, authSignupValidator, AuthSignup);
+app.post('/auth/login', AuthLoginRoute, authLoginValidator, AuthLogin);
+app.post('/auth/logout', AuthLogoutRoute, authLogoutValidator, AuthLogout);
+app.post('/auth/refresh', AuthRefreshRoute, authRefreshValidator, AuthRefresh);
 
-openapi.post('/auth/signup', AuthSignup);
-openapi.post('/auth/login', AuthLogin);
-openapi.post('/auth/logout', AuthLogout);
-openapi.post('/auth/refresh', AuthRefresh);
-
-openapi.get('/health', HealthCheck);
+app.get('/health', HealthCheckRoute, HealthCheck);
 
 const authServers = [
   { description: 'Local server', url: 'http://localhost:9010' },
@@ -73,21 +76,39 @@ const authServers = [
   },
 ];
 
-app.get('/scalar', (c) => {
+app.get(
+  '/doc',
+  openAPISpecs(app, {
+    documentation: {
+      components: {
+        securitySchemes: {
+          bearerAuth: {
+            bearerFormat: 'JWT',
+            description:
+              'Access token received from login or refresh endpoints',
+            scheme: 'bearer',
+            type: 'http',
+          },
+        },
+      },
+      info: {
+        title: 'otnpay Auth Service',
+        version: '1.0.0',
+      },
+      openapi: '3.0.0',
+      servers: authServers,
+    },
+  })
+);
+
+app.get('/scalar', (c, next) => {
   const isDev = new URL(c.req.url).hostname === 'localhost';
-  return Scalar({
+  return Scalar<AppEnv>({
     expandAllModelSections: true,
     expandAllResponses: true,
     servers: isDev ? authServers : [...authServers].reverse(),
     url: '/doc',
-  })(c);
-});
-
-openapi.registry.registerComponent('securitySchemes', 'bearerAuth', {
-  bearerFormat: 'JWT',
-  description: 'Access token received from login or refresh endpoints',
-  scheme: 'bearer',
-  type: 'http',
+  })(c, next);
 });
 
 export default app;

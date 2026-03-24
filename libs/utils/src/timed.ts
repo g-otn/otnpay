@@ -5,10 +5,10 @@ export async function timed<T>(
   promise: Promise<T>,
   log: Logger
 ): Promise<T> {
-  const start = Date.now();
+  const start = performance.now();
   try {
     return await promise;
   } finally {
-    log.info(`${label} (${Date.now() - start}ms)`);
+    log.info(`${label} took ${performance.now() - start}ms`);
   }
 }

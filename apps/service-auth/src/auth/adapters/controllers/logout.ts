@@ -1,37 +1,40 @@
-import { contentJson, OpenAPIRoute } from 'chanfana';
-import { Context } from 'hono';
-import { z } from 'zod';
+import { describeRoute } from 'hono-openapi';
+import { validator } from 'hono-openapi/valibot';
+import * as v from 'valibot';
 
 import { logout } from '~/auth/application/use-cases/logout';
-import { RouteTag } from '~/utils';
+import { AppEnv } from '~/types';
+import { RouteTag, validationHook } from '~/utils';
 
 import { getRedis, SessionRepository } from '../persistence';
 
-export class AuthLogout extends OpenAPIRoute {
-  schema = {
-    request: {
-      body: contentJson(
-        z.object({
-          refreshToken: z.string(),
-        })
-      ),
+const logoutBodySchema = v.object({
+  refreshToken: v.string(),
+});
+
+export const AuthLogoutRoute = describeRoute({
+  responses: {
+    204: {
+      description: 'Logged out',
     },
-    responses: {
-      '200': {
-        description: 'Logged out',
-      },
-    },
-    summary: 'Logout',
-    tags: [RouteTag.Auth],
-  };
+  },
+  summary: 'Logout',
+  tags: [RouteTag.Auth],
+});
 
-  async handle(c: Context<{ Bindings: Cloudflare.Env }>) {
-    const data = await this.getValidatedData<typeof this.schema>();
-    const { refreshToken } = data.body;
+export const authLogoutValidator = validator(
+  'json',
+  logoutBodySchema,
+  validationHook
+);
 
-    const sessionRepo = new SessionRepository(getRedis(c.env));
-    await logout({ refreshToken }, sessionRepo);
+export const AuthLogout = async (c: import('hono').Context<AppEnv>) => {
+  const { refreshToken } = c.req.valid('json' as never) as v.InferOutput<
+    typeof logoutBodySchema
+  >;
 
-    return c.status(204);
-  }
-}
+  const sessionRepo = new SessionRepository(getRedis(c.env));
+  await logout({ refreshToken }, sessionRepo);
+
+  return c.body(null, 204);
+};

@@ -1,7 +1,7 @@
 import { timed } from '@otnpay/utils';
-import { contentJson, OpenAPIRoute } from 'chanfana';
-import { Context } from 'hono';
-import { z } from 'zod';
+import { describeRoute } from 'hono-openapi';
+import { resolver } from 'hono-openapi/valibot';
+import * as v from 'valibot';
 
 import { AccountRepository } from '~/account/adapters/persistence/AccountRepository';
 import { getDB } from '~/account/adapters/persistence/db';
@@ -11,40 +11,44 @@ import { AppEnv } from '~/types';
 import { RouteTag } from '~/utils';
 import { notFoundResponse, unauthorizedResponse } from '~/utils/oas';
 
-export class AccountGetBalance extends OpenAPIRoute {
-  schema = {
-    responses: {
-      '200': {
-        description: 'Account balance',
-        ...contentJson(z.object({ balance: z.string(), user_id: z.number() })),
+export const AccountGetBalanceRoute = describeRoute({
+  responses: {
+    200: {
+      content: {
+        'application/json': {
+          schema: resolver(
+            v.object({ balance: v.string(), user_id: v.number() })
+          ),
+        },
       },
-      ...unauthorizedResponse,
-      ...notFoundResponse,
+      description: 'Account balance',
     },
-    security: [{ bearerAuth: [] }],
-    summary: 'Get account balance',
-    tags: [RouteTag.Account],
-  };
+    ...unauthorizedResponse,
+    ...notFoundResponse,
+  },
+  security: [{ bearerAuth: [] }],
+  summary: 'Get account balance',
+  tags: [RouteTag.Account],
+});
 
-  async handle(c: Context<AppEnv>) {
-    const userId = c.var.userId;
+export const AccountGetBalance = async (c: import('hono').Context<AppEnv>) => {
+  const userId = c.var.userId;
 
-    const accountRepo = new AccountRepository(
-      getDB(c.env.ACCOUNT_SERVICE_DB_URL, c.get('appName'))
+  const accountRepo = new AccountRepository(
+    getDB(c.env.ACCOUNT_SERVICE_DB_URL, c.get('appName'))
+  );
+
+  try {
+    const result = await timed(
+      `Get balance for user ${userId}`,
+      getBalance({ userId }, accountRepo),
+      c.var.logger
     );
-
-    try {
-      const result = await timed(
-        `Get balance for user ${userId}`,
-        getBalance({ userId }, accountRepo),
-        c.var.logger
-      );
-      return c.json(result);
-    } catch (e) {
-      if (e instanceof AccountNotFoundError) {
-        return c.json({ error: e.message }, 404);
-      }
-      throw e;
+    return c.json(result);
+  } catch (e) {
+    if (e instanceof AccountNotFoundError) {
+      return c.json({ error: e.message }, 404);
     }
+    throw e;
   }
-}
+};

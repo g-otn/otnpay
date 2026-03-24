@@ -1,6 +1,6 @@
 import { createServerFn } from '@tanstack/react-start';
 import { getRequest } from '@tanstack/react-start/server';
-import { z } from 'zod';
+import * as z from 'zod';
 
 const loginRequestSchema = z.object({
   email: z.email(),

@@ -23,6 +23,6 @@
     "check-password-strength": "^3.0.0"
   },
   "peerDependencies": {
-    "zod": ">=4.0.0"
+    "valibot": ">=1.0.0"
   }
 }

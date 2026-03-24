@@ -15,9 +15,6 @@
   },
   "references": [
     {
-      "path": "../../libs/schemas"
-    },
-    {
       "path": "../../libs/utils"
     }
   ]
