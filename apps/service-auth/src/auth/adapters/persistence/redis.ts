@@ -1,8 +1,7 @@
-import { Redis } from '@upstash/redis/cloudflare';
+import { RedisClient } from 'bun';
 
-export function getRedis(env: Cloudflare.Env) {
-  return new Redis({
-    token: env.AUTH_SERVICE_REDIS_TOKEN,
-    url: env.AUTH_SERVICE_REDIS_URL,
-  });
+import { Env } from '~/constants/env';
+
+export function getRedis() {
+  return new RedisClient(Env.REDIS_URL);
 }

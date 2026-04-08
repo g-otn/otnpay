@@ -1,1 +1,1 @@
-export * from './appName';
+export * from './logger';

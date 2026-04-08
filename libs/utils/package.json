@@ -13,6 +13,11 @@
     },
     "./package.json": "./package.json"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/g-otn/otnpay.git",
+    "directory": "libs/utils"
+  },
   "nx": {
     "tags": [
       "scope:shared",

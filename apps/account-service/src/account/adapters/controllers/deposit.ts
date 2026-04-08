@@ -1,61 +1,47 @@
 import { timed } from '@otnpay/utils';
-import { describeRoute } from 'hono-openapi';
-import { resolver, validator } from 'hono-openapi/valibot';
-import * as v from 'valibot';
+import { Elysia } from 'elysia';
 
 import { AccountRepository } from '~/account/adapters/persistence/AccountRepository';
 import { getDB } from '~/account/adapters/persistence/db';
 import { deposit } from '~/account/application/use-cases/deposit';
-import { AppEnv } from '~/types';
-import { RouteTag } from '~/utils';
+import { authPlugin } from '~/middleware/auth';
+import { logger } from '~/middleware/logger';
+import { SERVICE_NAME } from '~/utils/constants';
 import {
   badRequestResponse,
+  RouteTag,
   unauthorizedResponse,
-  validationHook,
 } from '~/utils/oas';
-import { amountSchema } from '~/utils/schemas';
+import { depositRequestSchema } from '~/utils/schemas';
 
-const depositBodySchema = v.object({ amount: amountSchema });
+export const depositPlugin = new Elysia().use(authPlugin).post(
+  '/accounts/deposit',
+  async ({ body, userId }) => {
+    const { amount } = body;
 
-export const AccountDepositRoute = describeRoute({
-  responses: {
-    201: {
-      content: {
-        'application/json': {
-          schema: resolver(v.object({ balance: v.string() })),
-        },
-      },
-      description: 'Deposit successful',
-    },
-    ...badRequestResponse,
-    ...unauthorizedResponse,
+    const accountRepo = new AccountRepository(
+      getDB(Bun.env.ACCOUNT_SERVICE_DB_URL!, SERVICE_NAME)
+    );
+
+    const { balance } = await timed(
+      `Deposit for user ${userId}`,
+      deposit({ amount, userId }, accountRepo),
+      logger
+    );
+
+    return new Response(JSON.stringify({ balance }), { status: 201 });
   },
-  security: [{ bearerAuth: [] }],
-  summary: 'Deposit funds into account',
-  tags: [RouteTag.Account],
-});
-
-export const accountDepositValidator = validator(
-  'json',
-  depositBodySchema,
-  validationHook
+  {
+    body: depositRequestSchema,
+    detail: {
+      responses: {
+        201: { description: 'Deposit successful' },
+        ...badRequestResponse,
+        ...unauthorizedResponse,
+      },
+      security: [{ bearerAuth: [] }],
+      summary: 'Deposit funds into account',
+      tags: [RouteTag.Account],
+    },
+  }
 );
-
-export const AccountDeposit = async (c: import('hono').Context<AppEnv>) => {
-  const { amount } = c.req.valid('json' as never) as v.InferOutput<
-    typeof depositBodySchema
-  >;
-  const userId = c.var.userId;
-
-  const accountRepo = new AccountRepository(
-    getDB(c.env.ACCOUNT_SERVICE_DB_URL, c.get('appName'))
-  );
-
-  const { balance } = await timed(
-    `Deposit for user ${userId}`,
-    deposit({ amount, userId }, accountRepo),
-    c.var.logger
-  );
-
-  return c.json({ balance }, 201);
-};

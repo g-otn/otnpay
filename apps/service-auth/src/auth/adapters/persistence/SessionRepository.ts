@@ -6,11 +6,11 @@ export class SessionRepository implements ISessionRepository {
   constructor(private redis: ReturnType<typeof getRedis>) {}
 
   async consumeRefreshToken(token: string) {
-    const [userId] = await Promise.all([
-      this.redis.get<number>(`refresh:${token}`),
+    const [raw] = await Promise.all([
+      this.redis.get(`refresh:${token}`),
       this.redis.del(`refresh:${token}`),
     ]);
-    return userId;
+    return raw != null ? Number(raw) : null;
   }
 
   async deleteRefreshToken(token: string) {
@@ -18,8 +18,10 @@ export class SessionRepository implements ISessionRepository {
   }
 
   async saveRefreshToken(token: string, userId: number) {
-    await this.redis.set(`refresh:${token}`, userId, {
-      ex: REFRESH_TOKEN_REDIS_TTL_SEC,
-    });
+    const key = `refresh:${token}`;
+    await Promise.all([
+      this.redis.set(key, userId),
+      this.redis.expire(key, REFRESH_TOKEN_REDIS_TTL_SEC),
+    ]);
   }
 }

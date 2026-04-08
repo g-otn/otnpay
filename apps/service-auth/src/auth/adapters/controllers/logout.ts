@@ -1,40 +1,31 @@
-import { describeRoute } from 'hono-openapi';
-import { validator } from 'hono-openapi/valibot';
+import { Elysia } from 'elysia';
 import * as v from 'valibot';
 
+import { getRedis } from '~/auth/adapters/persistence/redis';
+import { SessionRepository } from '~/auth/adapters/persistence/SessionRepository';
 import { logout } from '~/auth/application/use-cases/logout';
-import { AppEnv } from '~/types';
-import { RouteTag, validationHook } from '~/utils';
-
-import { getRedis, SessionRepository } from '../persistence';
+import { RouteTag } from '~/utils/oas';
 
 const logoutBodySchema = v.object({
   refreshToken: v.string(),
 });
 
-export const AuthLogoutRoute = describeRoute({
-  responses: {
-    204: {
-      description: 'Logged out',
-    },
+export const logoutPlugin = new Elysia().post(
+  '/auth/logout',
+  async ({ body }) => {
+    const { refreshToken } = body;
+    const sessionRepo = new SessionRepository(getRedis());
+    await logout({ refreshToken }, sessionRepo);
+    return new Response(null, { status: 204 });
   },
-  summary: 'Logout',
-  tags: [RouteTag.Auth],
-});
-
-export const authLogoutValidator = validator(
-  'json',
-  logoutBodySchema,
-  validationHook
+  {
+    body: logoutBodySchema,
+    detail: {
+      responses: {
+        204: { description: 'Logged out' },
+      },
+      summary: 'Logout',
+      tags: [RouteTag.Auth],
+    },
+  }
 );
-
-export const AuthLogout = async (c: import('hono').Context<AppEnv>) => {
-  const { refreshToken } = c.req.valid('json' as never) as v.InferOutput<
-    typeof logoutBodySchema
-  >;
-
-  const sessionRepo = new SessionRepository(getRedis(c.env));
-  await logout({ refreshToken }, sessionRepo);
-
-  return c.body(null, 204);
-};

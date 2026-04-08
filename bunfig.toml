@@ -1,0 +1,6 @@
+[publish]
+registry = "https://npm.pkg.github.com"
+token = "$GITHUB_TOKEN"
+
+[install.scopes]
+"@otnpay" = { registry = "https://npm.pkg.github.com/", token = "$GITHUB_TOKEN" }

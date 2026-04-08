@@ -49,3 +49,9 @@ test-output
 
 # Local files
 settings.local.json
+
+# AI Agent directories
+.agents/
+skills/
+.nx/polygraph
+.claude/worktrees

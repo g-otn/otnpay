@@ -1,7 +1,5 @@
 import { timed } from '@otnpay/utils';
-import { describeRoute } from 'hono-openapi';
-import { resolver, validator } from 'hono-openapi/valibot';
-import * as v from 'valibot';
+import { Elysia, status } from 'elysia';
 
 import { AccountRepository } from '~/account/adapters/persistence/AccountRepository';
 import { getDB } from '~/account/adapters/persistence/db';
@@ -10,72 +8,56 @@ import {
   AccountNotFoundError,
   InsufficientFundsError,
 } from '~/account/domain/errors';
-import { AppEnv } from '~/types';
-import { RouteTag } from '~/utils';
+import { authPlugin } from '~/middleware/auth';
+import { logger } from '~/middleware/logger';
+import { SERVICE_NAME } from '~/utils/constants';
 import {
   badRequestResponse,
-  ErrorSchema,
   notFoundResponse,
+  RouteTag,
   unauthorizedResponse,
-  validationHook,
 } from '~/utils/oas';
-import { amountSchema } from '~/utils/schemas';
+import { withdrawRequestSchema } from '~/utils/schemas';
 
-const withdrawBodySchema = v.object({ amount: amountSchema });
+export const withdrawPlugin = new Elysia().use(authPlugin).post(
+  '/accounts/withdraw',
+  async ({ body, userId }) => {
+    const { amount } = body;
 
-export const AccountWithdrawRoute = describeRoute({
-  responses: {
-    200: {
-      content: {
-        'application/json': {
-          schema: resolver(v.object({ balance: v.string() })),
-        },
-      },
-      description: 'Withdrawal successful',
-    },
-    ...badRequestResponse,
-    ...unauthorizedResponse,
-    ...notFoundResponse,
-    422: {
-      content: { 'application/json': { schema: resolver(ErrorSchema) } },
-      description: 'Insufficient funds',
-    },
-  },
-  security: [{ bearerAuth: [] }],
-  summary: 'Withdraw funds from account',
-  tags: [RouteTag.Account],
-});
-
-export const accountWithdrawValidator = validator(
-  'json',
-  withdrawBodySchema,
-  validationHook
-);
-
-export const AccountWithdraw = async (c: import('hono').Context<AppEnv>) => {
-  const { amount } = c.req.valid('json' as never) as v.InferOutput<
-    typeof withdrawBodySchema
-  >;
-  const userId = c.var.userId;
-
-  const accountRepo = new AccountRepository(
-    getDB(c.env.ACCOUNT_SERVICE_DB_URL, c.get('appName'))
-  );
-
-  try {
-    const { balance } = await timed(
-      `Withdraw for user ${userId}`,
-      withdraw({ amount, userId }, accountRepo),
-      c.var.logger
+    const accountRepo = new AccountRepository(
+      getDB(Bun.env.ACCOUNT_SERVICE_DB_URL!, SERVICE_NAME)
     );
-    return c.json({ balance });
-  } catch (e) {
-    if (e instanceof AccountNotFoundError) {
-      return c.json({ error: e.message }, 404);
+
+    try {
+      const { balance } = await timed(
+        `Withdraw for user ${userId}`,
+        withdraw({ amount, userId }, accountRepo),
+        logger
+      );
+      return { balance };
+    } catch (e) {
+      if (e instanceof AccountNotFoundError) {
+        return status(404, { error: e.message });
+      }
+      if (e instanceof InsufficientFundsError) {
+        return status(422, { error: e.message });
+      }
+      throw e;
     }
-    if (e instanceof InsufficientFundsError) {
-      return c.json({ error: e.message }, 422);
-    }
-    throw e;
+  },
+  {
+    body: withdrawRequestSchema,
+    detail: {
+      responses: {
+        200: { description: 'Withdrawal successful' },
+        422: { description: 'Insufficient funds' },
+        ...badRequestResponse,
+        ...unauthorizedResponse,
+        ...notFoundResponse,
+      },
+      security: [{ bearerAuth: [] }],
+      summary: 'Withdraw funds from account',
+      tags: [RouteTag.Account],
+    },
   }
-};
+);

@@ -1,2 +1,2 @@
-export * from './appName';
 export * from './auth';
+export * from './logger';

@@ -1,26 +1,28 @@
-import { createMiddleware } from 'hono/factory';
+import { Elysia, status } from 'elysia';
 
-import { AppEnv } from '~/types';
 import { verifyJwt } from '~/utils/jwt';
 
-// We could use Hono built-in JWT middleware but it returns text response instead of RESTful errors
-export const auth = createMiddleware<AppEnv>(async (c, next) => {
-  const authHeader = c.req.header('Authorization');
-  if (!authHeader?.startsWith('Bearer ')) {
-    return c.json({ error: 'Unauthorized' }, 401);
-  }
-
-  const token = authHeader.slice(7);
-  try {
-    const payload = await verifyJwt(token, c.env.AUTH_SERVICE_JWT_PUBLIC_KEY);
-    const userId = Number(payload.sub);
-    if (!payload.sub || isNaN(userId)) {
-      return c.json({ error: 'Unauthorized' }, 401);
+export const authPlugin = new Elysia({ name: 'auth' }).resolve(
+  { as: 'scoped' },
+  async ({ headers }) => {
+    const authHeader = headers['authorization'];
+    if (!authHeader?.startsWith('Bearer ')) {
+      return status(401, { error: 'Unauthorized' });
     }
-    c.set('userId', userId);
-  } catch {
-    return c.json({ error: 'Unauthorized' }, 401);
-  }
 
-  return next();
-});
+    const token = authHeader.slice(7);
+    try {
+      const payload = await verifyJwt(
+        token,
+        Bun.env.AUTH_SERVICE_JWT_PUBLIC_KEY!
+      );
+      const userId = Number(payload.sub);
+      if (!payload.sub || isNaN(userId)) {
+        return status(401, { error: 'Unauthorized' });
+      }
+      return { userId };
+    } catch {
+      return status(401, { error: 'Unauthorized' });
+    }
+  }
+);
